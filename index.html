@@ -1,0 +1,3358 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>仙译 · Tiên Dịch</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;600;700&family=Noto+Serif:ital,wght@0,400;0,600;1,400&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+  :root {
+    /* GIAO DIỆN TỐI (dark mode) */
+    --ink: #ece6da;          /* chữ chính */
+    --paper: #121110;        /* nền trang */
+    --gold: #e0b858;
+    --gold-light: #f2d48c;
+    --gold-dim: #e0b858;
+    --red: #ff8a7a;
+    --jade: #63d69f;
+    --jade-light: #63d69f;
+    --smoke: #232019;
+    --ash: #a99f8f;          /* chữ phụ */
+    --border: rgba(224,184,88,0.22);
+    --shadow: rgba(0,0,0,0.45);
+    --card-bg: #1c1a17;
+    --input-bg: #26231f;
+    --readonly-bg: #201e1a;
+    --log-bg: #161513;
+    --ui-font: 'Be Vietnam Pro', 'Segoe UI', 'Noto Sans', system-ui, sans-serif;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Serif', serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 10% 0%, rgba(201,168,76,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 90% 100%, rgba(139,26,26,0.06) 0%, transparent 50%),
+      url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c9a84c' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #1a0a00 0%, #2d1500 50%, #1a0a00 100%);
+    padding: 16px 20px 14px;
+    text-align: center;
+    position: relative;
+    border-bottom: 2px solid var(--gold);
+    box-shadow: 0 4px 20px rgba(26,10,0,0.4);
+  }
+  .header::before, .header::after {
+    content: '❧';
+    position: absolute;
+    top: 50%; transform: translateY(-50%);
+    color: var(--gold-dim);
+    font-size: 20px;
+  }
+  .header::before { left: 16px; }
+  .header::after { right: 16px; transform: translateY(-50%) scaleX(-1); }
+  .header h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 22px;
+    color: var(--gold);
+    letter-spacing: 3px;
+    text-shadow: 0 0 20px rgba(201,168,76,0.5);
+  }
+  .header p { color: var(--ash); font-size: 11px; margin-top: 2px; letter-spacing: 1px; }
+
+  /* TABS */
+  .tab-nav {
+    display: flex;
+    background: #150800;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tab-nav::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    flex: 1; min-width: 80px;
+    padding: 10px 8px;
+    background: none; border: none;
+    color: var(--ash);
+    font-family: 'Noto Serif SC', serif;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+  }
+  .tab-btn.active {
+    color: var(--gold);
+    border-bottom-color: var(--gold);
+    background: rgba(201,168,76,0.05);
+  }
+
+  /* PANELS */
+  .panel { display: none; padding: 16px; animation: fadeIn 0.2s ease; }
+  .panel.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; } }
+
+  /* CARDS */
+  .card {
+    background: rgba(255,255,255,0.6);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 14px;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 2px 12px var(--shadow);
+  }
+  .card-title {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 13px;
+    color: var(--gold-dim);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+  }
+  .card-title::before {
+    content: '';
+    display: inline-block;
+    width: 3px; height: 14px;
+    background: var(--gold);
+    border-radius: 2px;
+  }
+
+  /* FORM ELEMENTS */
+  label { font-size: 12px; color: var(--ash); display: block; margin-bottom: 4px; }
+  input, textarea, select {
+    width: 100%;
+    background: rgba(253,246,227,0.8);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 9px 11px;
+    font-family: 'Noto Serif', serif;
+    font-size: 13px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 2px rgba(201,168,76,0.15);
+  }
+  textarea { resize: vertical; min-height: 100px; }
+  select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23c9a84c' stroke-width='1.5' fill='none'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; }
+
+  /* API KEY TAGS */
+  .key-input-area {
+    position: relative;
+  }
+  .key-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-height: 36px;
+    padding: 6px;
+    background: rgba(253,246,227,0.8);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: text;
+    transition: border-color 0.2s;
+  }
+  .key-tags.focused { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(201,168,76,0.15); }
+  .key-tag {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: linear-gradient(135deg, #1a0a00, #2d1500);
+    color: var(--gold-light);
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-size: 11px;
+    font-family: monospace;
+    max-width: 160px;
+  }
+  .key-tag span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .key-tag .status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--ash);
+    flex-shrink: 0;
+  }
+  .key-tag .status-dot.ok { background: var(--jade-light); }
+  .key-tag .status-dot.err { background: #e74c3c; }
+  .key-tag .status-dot.checking { background: var(--gold); animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .key-tag .remove-key {
+    cursor: pointer; color: var(--ash); font-size: 14px; line-height: 1;
+    flex-shrink: 0;
+  }
+  .key-tag .remove-key:hover { color: #e74c3c; }
+  .key-input-field {
+    border: none; background: transparent; outline: none;
+    font-size: 12px; color: var(--ink);
+    min-width: 120px; flex: 1;
+    padding: 2px 4px;
+  }
+  .key-paste-hint { font-size: 10px; color: var(--ash); margin-top: 4px; }
+
+  /* BUTTONS */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 16px;
+    border-radius: 6px;
+    border: none;
+    font-family: 'Noto Serif SC', serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, #8a6f2e, #c9a84c, #8a6f2e);
+    color: #1a0a00;
+    font-weight: 700;
+    box-shadow: 0 2px 10px rgba(201,168,76,0.3);
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(201,168,76,0.4); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-secondary {
+    background: rgba(201,168,76,0.1);
+    color: var(--gold-dim);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { background: rgba(201,168,76,0.2); }
+  .btn-danger {
+    background: rgba(139,26,26,0.1);
+    color: var(--red);
+    border: 1px solid rgba(139,26,26,0.3);
+  }
+  .btn-jade {
+    background: rgba(45,106,79,0.1);
+    color: var(--jade);
+    border: 1px solid rgba(45,106,79,0.3);
+  }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn-full { width: 100%; }
+
+  /* STYLE PRESET BUTTONS */
+  .style-preset-btn { transition: all .15s; }
+  .style-preset-btn.active {
+    background: rgba(201,168,76,0.28) !important;
+    border-color: var(--gold) !important;
+    color: var(--gold) !important;
+    font-weight: 600;
+    box-shadow: 0 0 8px rgba(201,168,76,0.2);
+  }
+
+  /* MODE TOGGLE */
+  .mode-toggle {
+    display: flex;
+    background: rgba(26,10,0,0.05);
+    border-radius: 8px;
+    padding: 3px;
+    border: 1px solid var(--border);
+  }
+  .mode-opt {
+    flex: 1; padding: 8px 10px; border-radius: 6px;
+    text-align: center; cursor: pointer;
+    font-size: 12px; color: var(--ash);
+    font-family: 'Noto Serif SC', serif;
+    transition: all 0.2s;
+  }
+  .mode-opt.active {
+    background: linear-gradient(135deg, #1a0a00, #2d1500);
+    color: var(--gold-light);
+  }
+
+  /* PROGRESS */
+  .progress-wrap {
+    background: rgba(26,10,0,0.08);
+    border-radius: 20px;
+    height: 8px;
+    overflow: hidden;
+    margin: 8px 0;
+  }
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold-dim), var(--gold), var(--gold-dim));
+    background-size: 200% 100%;
+    border-radius: 20px;
+    transition: width 0.4s ease;
+    animation: shimmer 2s infinite;
+  }
+  @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+  .progress-text { font-size: 12px; color: var(--ash); text-align: center; }
+
+  /* LOG */
+  .log-area {
+    background: rgba(26,10,0,0.04);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px;
+    max-height: 140px;
+    overflow-y: auto;
+    font-size: 11px;
+    font-family: monospace;
+    line-height: 1.6;
+  }
+  .log-ok { color: var(--jade); }
+  .log-err { color: var(--red); }
+  .log-info { color: var(--ash); }
+  .log-warn { color: #c9a84c; }
+
+  /* CHAPTER LIST */
+  .chapter-list {
+    max-height: 200px;
+    overflow-y: auto;
+    font-size: 12px;
+    line-height: 1.8;
+  }
+  .chapter-item {
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.15s;
+    display: flex;
+    gap: 8px;
+  }
+  .chapter-item:hover { background: rgba(201,168,76,0.1); }
+  .chapter-item .ch-num { color: var(--gold-dim); flex-shrink: 0; font-weight: 600; }
+  .chapter-item .ch-title { color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .chapter-item .ch-status { margin-left: auto; flex-shrink: 0; font-size: 10px; }
+  .ch-done { color: var(--jade); }
+  .ch-doing { color: var(--gold); animation: pulse 1s infinite; }
+  .ch-wait { color: var(--ash); }
+  .ch-err { color: var(--red); }
+  .btn-retry {
+    background: none; border: none; cursor: pointer;
+    font-size: 14px; padding: 0 2px; line-height: 1;
+    flex-shrink: 0; transition: transform 0.3s;
+  }
+  .btn-retry:hover { transform: rotate(180deg); }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(26,10,0,0.7);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: var(--paper);
+    border: 1px solid var(--gold);
+    border-radius: 12px;
+    width: 100%;
+    max-width: 520px;
+    max-height: 85vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(26,10,0,0.5);
+  }
+  .modal-header {
+    background: linear-gradient(135deg, #1a0a00, #2d1500);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .modal-header h3 { color: var(--gold); font-family: 'Cinzel', serif; font-size: 14px; }
+  .modal-close { background: none; border: none; color: var(--ash); font-size: 20px; cursor: pointer; }
+  .modal-body { padding: 16px; overflow-y: auto; flex: 1; }
+
+  /* NAME SYNC TABLE */
+  .name-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .name-table th {
+    background: rgba(201,168,76,0.1);
+    padding: 8px 10px;
+    text-align: left;
+    color: var(--gold-dim);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+    font-family: 'Noto Serif SC', serif;
+  }
+  .name-table td { padding: 6px 10px; border-bottom: 1px solid rgba(201,168,76,0.1); }
+  .name-table input {
+    border: none; background: transparent; padding: 2px 4px;
+    font-size: 13px; width: 100%;
+  }
+  .name-table tr:hover td { background: rgba(201,168,76,0.05); }
+
+  /* BADGE */
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    background: rgba(201,168,76,0.15);
+    color: var(--gold-dim);
+    border: 1px solid var(--border);
+  }
+
+  /* FILE INPUT AREA */
+  .file-drop {
+    border: 2px dashed var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--ash);
+    font-size: 13px;
+  }
+  .file-drop:hover, .file-drop.drag { border-color: var(--gold); background: rgba(201,168,76,0.05); color: var(--gold-dim); }
+  .file-drop input[type=file] { display: none; }
+  .file-drop .icon { font-size: 28px; margin-bottom: 6px; }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  /* RESULT DISPLAY */
+  .result-box {
+    background: rgba(26,10,0,0.03);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 13px;
+    line-height: 1.8;
+    max-height: 300px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    font-family: 'Noto Serif', serif;
+  }
+
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 14px 0;
+  }
+
+  .info-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    background: rgba(45,106,79,0.1);
+    color: var(--jade);
+    border: 1px solid rgba(45,106,79,0.2);
+  }
+
+  .spinning { animation: spin 1s linear infinite; display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ===================== DARK MODE · DỄ NHÌN, DỄ BẤM ===================== */
+  body {
+    font-family: var(--ui-font);
+    font-size: 14px;
+    background: var(--paper);
+    background-image: radial-gradient(ellipse at 10% 0%, rgba(224,184,88,0.06) 0%, transparent 50%),
+                      radial-gradient(ellipse at 90% 100%, rgba(255,138,122,0.04) 0%, transparent 50%);
+    background-attachment: fixed;
+  }
+  ::selection { background: #5a4a26; color: var(--ink); }
+  .header { background: linear-gradient(135deg, #0b0a09 0%, #1c1712 50%, #0b0a09 100%); box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+  .header p { font-family: var(--ui-font); font-size: 12px; }
+  .tab-nav { background: #0e0d0b; }
+  .tab-btn { font-family: var(--ui-font); font-size: 13px; padding: 12px 8px; }
+  .tab-btn:hover { color: var(--ink); }
+  .tab-btn.active { background: rgba(224,184,88,0.08); font-weight: 600; }
+  .panel { max-width: 860px; margin: 0 auto; }
+  .card { background: var(--card-bg); backdrop-filter: none; padding: 16px; border-radius: 12px; }
+  .card-title { font-family: var(--ui-font); font-size: 14px; }
+  label { font-size: 13px; }
+  input, textarea, select {
+    background: var(--input-bg); font-family: var(--ui-font); font-size: 14px; padding: 10px 12px; border-radius: 8px;
+  }
+  input::placeholder, textarea::placeholder { color: #7d7466; }
+  select option, select optgroup { background: #26231f; color: var(--ink); }
+  textarea { line-height: 1.6; }
+  code { background: rgba(224,184,88,0.12); color: var(--gold-light); padding: 1px 5px; border-radius: 4px; }
+  .key-tags { background: var(--input-bg); border-radius: 8px; padding: 8px; }
+  .key-tag { background: #2e2922; font-size: 12px; padding: 4px 9px; }
+  .key-input-field { font-size: 14px; }
+  .key-paste-hint { font-size: 12px; }
+  .btn { font-family: var(--ui-font); font-size: 14px; padding: 11px 18px; border-radius: 8px; }
+  .btn-primary { background: var(--gold); color: #17130b; box-shadow: 0 2px 10px rgba(224,184,88,0.25); }
+  .btn-primary:hover { background: #efca70; }
+  .btn-secondary { background: #2a2620; color: var(--gold-light); border: 1px solid #3b352d; }
+  .btn-secondary:hover { background: #38322a; }
+  .btn-danger { background: #3a1e1a; color: var(--red); border: 1px solid #74362d; }
+  .btn-danger:hover { background: #4c2621; }
+  .btn-jade { background: #172a21; color: var(--jade); border: 1px solid #2f6048; }
+  .btn-jade:hover { background: #1f392c; }
+  .style-preset-btn.active { background: #3a3018 !important; color: var(--gold-light) !important; }
+  .mode-toggle { background: #232019; border-radius: 10px; }
+  .mode-opt { font-family: var(--ui-font); font-size: 13px; padding: 10px; color: var(--ink); }
+  .mode-opt.active { background: var(--gold); color: #17130b; font-weight: 700; }
+  .progress-wrap { background: #302b24; height: 10px; }
+  .progress-text { font-size: 13px; color: var(--ink); }
+  .log-area { background: var(--log-bg); font-size: 12.5px; max-height: 220px; font-family: 'Cascadia Mono', Consolas, Menlo, monospace; }
+  .log-warn { color: var(--gold-light); }
+  .chapter-list { font-size: 13px; line-height: 2; max-height: 260px; }
+  .chapter-item:hover { background: rgba(224,184,88,0.08); }
+  .btn-retry { font-size: 16px; }
+  .modal-overlay { background: rgba(0,0,0,0.72); }
+  .modal { background: var(--card-bg); }
+  .modal-header { background: #0b0a09; }
+  .modal-header h3 { font-family: var(--ui-font); font-size: 15px; }
+  .name-table th { font-family: var(--ui-font); }
+  .name-table input { color: var(--ink); }
+  .badge { background: rgba(224,184,88,0.15); color: var(--gold-light); }
+  .result-box { background: var(--input-bg); color: var(--ink); font-family: var(--ui-font); font-size: 15px; line-height: 1.9; max-height: 60vh; padding: 14px 16px; }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-thumb { background: #3b352d; border-radius: 6px; }
+  ::-webkit-scrollbar-thumb:hover { background: #4d453a; }
+  input[type=checkbox], input[type=radio] { width: auto; accent-color: var(--gold); }
+  .chapter-list { position: relative; }
+  .chapter-item.is-doing { background: rgba(224,184,88,0.14); }
+  /* TAB NOTE */
+  .note-box { background: var(--input-bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px;
+              max-height: 60vh; overflow-y: auto; font-size: 15px; line-height: 1.8; }
+  .note-head { color: var(--gold-light); font-weight: 700; margin-top: 10px; }
+  .note-head:first-child { margin-top: 0; }
+  .note-item { padding-left: 18px; text-indent: -12px; color: var(--ink); }
+  .note-empty { color: var(--ash); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>仙 译 · TIÊN DỊCH</h1>
+  <p>Công cụ dịch tiểu thuyết tiên hiệp · OpenAI API</p>
+</div>
+
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('config')">⚙️ Cấu hình</button>
+  <button class="tab-btn" onclick="switchTab('input')">📖 Văn bản</button>
+  <button class="tab-btn" onclick="switchTab('translate')">⚡ Dịch</button>
+  <button class="tab-btn" id="tabBtnNote" onclick="switchTab('note')">📝 Note</button>
+  <button class="tab-btn" onclick="switchTab('folder')">📁 Folder</button>
+  <button class="tab-btn" onclick="switchTab('result')">📜 Kết quả</button>
+</div>
+
+<!-- ===== TAB: CẤU HÌNH ===== -->
+<div id="tab-config" class="panel active">
+
+  <div class="card">
+    <div class="card-title">API Keys · Khóa API</div>
+    <label>Nhập nhiều key cách nhau dấu phẩy (,) hoặc Enter từng key:</label>
+    <div class="key-tags" id="keyTagsContainer" onclick="document.getElementById('keyInputField').focus()">
+      <input type="text" id="keyInputField" class="key-input-field" placeholder="Dán OpenAI API key (sk-...) rồi nhấn Enter..." />
+    </div>
+    <div class="key-paste-hint">💡 OpenAI API key bắt đầu bằng <code>sk-...</code> · Dán nhiều key: <code>key1,key2</code> rồi Enter</div>
+    <div style="margin-top:5px; font-size:12px; color:var(--jade); font-weight:600;" id="keyCountDisplay">0 API key</div>
+    <div style="margin-top:10px;" class="btn-row">
+      <button class="btn btn-secondary" onclick="checkAllKeys()">🔍 Kiểm tra tất cả</button>
+      <button class="btn btn-danger" onclick="clearAllKeys()">🗑️ Xóa hết</button>
+      <button class="btn btn-secondary" onclick="document.getElementById('keyTxtInput').click()">📂 Nhập key từ TXT</button>
+      <input type="file" id="keyTxtInput" accept=".txt" style="display:none;" onchange="importKeysTxt(event)" />
+    </div>
+    <div id="keyLog" class="log-area" style="margin-top:10px; display:none;"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Model · Mô hình</div>
+    <select id="modelSelect">
+      <optgroup label="✨ GPT-4o">
+        <option value="gpt-4o" selected>GPT-4o ⚡ (Khuyên dùng)</option>
+        <option value="gpt-4o-mini">GPT-4o Mini 💨 (Tiết kiệm)</option>
+      </optgroup>
+      <optgroup label="GPT-4.1">
+        <option value="gpt-4.1">GPT-4.1 🔥</option>
+        <option value="gpt-4.1-mini">GPT-4.1 Mini</option>
+        <option value="gpt-4.1-nano">GPT-4.1 Nano</option>
+      </optgroup>
+      <optgroup label="o-series (Reasoning)">
+        <option value="o4-mini">o4-mini 🧠</option>
+        <option value="o3-mini">o3-mini</option>
+      </optgroup>
+      <optgroup label="GPT-3.5">
+        <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+      </optgroup>
+    </select>
+    <div style="margin-top:6px;font-size:11px;color:var(--ash);">💡 GPT-4o Mini tiết kiệm chi phí, GPT-4o chất lượng cao nhất cho dịch truyện.</div>
+
+  </div>
+
+  <div class="card">
+    <div class="card-title">Tùy chỉnh dịch</div>
+    <label>Phong cách dịch:</label>
+    <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; margin-top:4px;">
+      <button class="btn btn-secondary style-preset-btn active" id="presetCotrang" onclick="applyStylePreset('cotrang')" style="flex:1; min-width:80px; font-size:12px; padding:7px 8px;">🏯 Cổ Trang</button>
+      <button class="btn btn-secondary style-preset-btn" id="presetDanquoc" onclick="applyStylePreset('danquoc')" style="flex:1; min-width:80px; font-size:12px; padding:7px 8px;">🎩 Dân Quốc</button>
+      <button class="btn btn-secondary style-preset-btn" id="presetHiendai" onclick="applyStylePreset('hiendai')" style="flex:1; min-width:80px; font-size:12px; padding:7px 8px;">🌆 Hiện Đại</button>
+    </div>
+    <label>Prompt (bấm để xem / sửa / nhập từ file TXT):</label>
+    <button class="btn btn-secondary btn-full" onclick="openPromptModal(1)" style="margin-top:4px;">📝 Prompt 1 · Dịch (Trung → Việt)</button>
+    <div class="key-paste-hint" id="prompt1Info"></div>
+    <button class="btn btn-secondary btn-full" onclick="openPromptModal(2)" style="margin-top:10px;">🔎 Prompt 2 · Biên tập / Quét lại</button>
+    <div class="key-paste-hint" id="prompt2Info"></div>
+    <label style="display:flex; align-items:center; gap:8px; cursor:pointer; color:var(--ink); font-size:14px; margin:10px 0 0;">
+      <input type="checkbox" id="scan2Toggle" checked onchange="saveSettingsToStorage()" /> Bật bước quét bằng Prompt 2 (chạy sau khi dịch, trước khi xuất file)
+    </label>
+
+    <div class="divider"></div>
+    <label>Kích thước chunk (ký tự/lần gọi API):</label>
+    <input type="number" id="chunkSize" value="2000" min="500" max="8000" step="500" />
+
+    <div class="divider"></div>
+    <label style="margin-bottom:6px;">Thư mục xuất file:</label>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <input type="text" id="outputFolderName" value="Chưa chọn (mặc định: Downloads)" readonly
+        style="flex:1; cursor:pointer; font-size:12px;" onclick="pickFolder()" />
+      <button class="btn btn-secondary" onclick="pickFolder()" style="padding:8px 12px; flex-shrink:0;">📁 Chọn</button>
+    </div>
+    <div id="folderStatus" class="key-paste-hint">💡 Nhấn Chọn để lưu file thẳng vào thư mục (Chrome/Edge). Nếu không chọn sẽ tải về Downloads.</div>
+  </div>
+
+</div>
+
+<!-- ===== TAB: VĂN BẢN ===== -->
+<div id="tab-input" class="panel">
+
+  <div class="card">
+    <div class="card-title">Nhập văn bản gốc</div>
+    <label class="file-drop" id="fileDrop" ondragover="handleDrag(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+      <div class="icon">📂</div>
+      <div>Kéo thả file TXT / EPUB hoặc nhấn để chọn file</div>
+      <div style="font-size:11px; margin-top:4px;">Hỗ trợ: .txt (UTF-8) · .epub (tự phân chương)</div>
+      <input type="file" id="fileInput" accept=".txt,.epub" onchange="loadFile(event)" />
+    </label>
+    <div id="epubInfo" style="display:none; margin-top:8px; padding:8px 12px; background:rgba(45,106,79,0.08); border:1px solid rgba(45,106,79,0.25); border-radius:6px; font-size:12px; color:var(--jade);"></div>
+
+    <div class="divider"></div>
+    <label>Hoặc dán văn bản trực tiếp:</label>
+    <textarea id="sourceText" rows="8" placeholder="Dán nội dung tiếng Trung vào đây...&#10;&#10;Ví dụ:&#10;第一章 天才少年&#10;..."></textarea>
+
+    <div style="margin-top:6px; font-size:11px; color:var(--ash); text-align:right;" id="charCount">0 ký tự</div>
+    <div style="margin-top:6px;" class="btn-row">
+      <button class="btn btn-primary" onclick="detectChapters()">🔍 Nhận dạng chương</button>
+      <button class="btn btn-secondary" onclick="pasteQuickSource()" title="Dán nhanh từ clipboard">📋 Paste</button>
+      <button class="btn btn-danger" onclick="clearSource()">🗑️ Xóa</button>
+    </div>
+  </div>
+
+  <div class="card" id="chapterDetectCard" style="display:none;">
+    <div class="card-title">
+      Danh sách chương đã nhận dạng
+      <span class="badge" id="chapterCount">0 chương</span>
+    </div>
+    <div class="chapter-list" id="chapterListDisplay"></div>
+  </div>
+
+</div>
+
+<!-- ===== TAB: DỊCH ===== -->
+<div id="tab-translate" class="panel">
+
+  <div class="card">
+    <div class="card-title">Chế độ dịch</div>
+    <div class="mode-toggle">
+      <div class="mode-opt" id="modeAll" onclick="setMode('all')">📜 Dịch tất cả</div>
+      <div class="mode-opt active" id="modeChapter" onclick="setMode('chapter')">📑 Từng chương</div>
+    </div>
+    <div style="margin-top:8px; font-size:11px; color:var(--ash);" id="modeDesc">
+      Dịch từng chương → mỗi chương xuất 1 file riêng (ví dụ: Chương 1.txt)
+    </div>
+    <div id="customFilenameWrap" style="display:none; margin-top:10px;">
+      <label style="margin-bottom:4px; font-size:12px; color:var(--ash);">📝 Tên file tải xuống (không bắt buộc):</label>
+      <input type="text" id="customFilenameAll" placeholder="Để trống sẽ dùng tên mặc định (VD: Chương 1-20.txt)" style="width:100%; font-size:12px;" />
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Đồng bộ tên nhân vật</div>
+    <div class="btn-row">
+      <button class="btn btn-jade btn-full" onclick="openNameSync()">👥 Quản lý tên nhân vật</button>
+    </div>
+    <div style="margin-top:6px; font-size:11px; color:var(--ash);" id="nameSyncInfo">Chưa có tên nào được đồng bộ</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Tiến trình dịch</div>
+    <div id="styleNotice" style="display:none; margin:-4px 0 10px; font-size:12px; font-weight:600; color:var(--red);"></div>
+    <div id="quotaNotice" style="display:none; margin-bottom:10px; padding:8px 10px; background:rgba(139,26,26,0.08); border:1px solid rgba(139,26,26,0.3); border-radius:8px; font-size:12px; color:var(--red); line-height:1.6;">
+      🛑 <strong>Đã hết quota API!</strong> Vui lòng nạp thêm quota (hoặc thêm API key mới), sau đó bấm "▶▶ Tiếp tục dịch" để dịch tiếp chương đang dở dang.
+    </div>
+    <div id="progressSection" style="display:none;">
+      <div class="progress-text" id="progressText">0 / 0 chương</div>
+      <div class="progress-wrap">
+        <div class="progress-bar" id="progressBar" style="width:0%"></div>
+      </div>
+      <div style="font-size:11px; color:var(--ash); margin-top:4px;" id="currentKeyInfo">Key đang dùng: —</div>
+    </div>
+
+    <div class="btn-row" style="margin-top:10px;">
+      <button class="btn btn-primary btn-full" id="btnTranslate" onclick="startTranslation()">
+        ⚡ Bắt đầu dịch
+      </button>
+      <button class="btn btn-danger" id="btnStop" onclick="stopTranslation()" style="display:none;">
+        ⏹ Dừng
+      </button>
+      <button class="btn btn-jade" id="btnContinue" onclick="continueTranslation()" style="display:none;">
+        ▶▶ Tiếp tục dịch
+      </button>
+    </div>
+
+    <div id="translateLog" class="log-area" style="margin-top:10px;"></div>
+  </div>
+
+  <div class="card" id="chapterProgressCard" style="display:none;">
+    <div class="card-title">Tiến độ từng chương</div>
+    <div id="errorSummary" style="display:none; margin-bottom:8px; padding:6px 10px; background:rgba(139,26,26,0.08); border:1px solid rgba(139,26,26,0.25); border-radius:6px; font-size:12px; color:var(--red); display:flex; align-items:center; gap:8px;">
+      <span id="errorSummaryText"></span>
+      <button class="btn btn-danger" style="padding:4px 10px; font-size:11px; margin-left:auto;" onclick="retryAllErrors()">🔄 Dịch lại tất cả lỗi</button>
+    </div>
+    <div class="chapter-list" id="chapterProgressList"></div>
+  </div>
+
+</div>
+
+<!-- ===== TAB: NOTE — từ Prompt 2 không dịch được ===== -->
+<div id="tab-note" class="panel">
+
+  <div class="card">
+    <div class="card-title">
+      📝 Từ chưa dịch được (Prompt 2)
+      <span class="badge" id="noteCount">0 từ</span>
+    </div>
+    <div style="font-size:13px; color:var(--ash); margin-bottom:10px; line-height:1.6;">
+      Danh sách từ tiếng Trung, tiếng Anh... mà bước quét Prompt 2 vẫn không dịch được, nhóm theo chương / file.
+      Có thể thêm vào 👥 Đồng bộ tên nhân vật rồi dịch lại.
+    </div>
+    <div class="btn-row" style="margin-bottom:10px;">
+      <button class="btn btn-primary" onclick="copyNotes()">📋 Copy nhanh</button>
+      <button class="btn btn-secondary" onclick="copyNoteWords()">📋 Copy từ gốc</button>
+      <button class="btn btn-danger" onclick="clearAllNotes()">🗑️ Xóa</button>
+    </div>
+    <div class="note-box" id="noteBox"><div class="note-empty">Chưa có từ nào. Sau khi dịch, những từ Prompt 2 không dịch được sẽ hiện ở đây.</div></div>
+  </div>
+
+</div>
+
+<!-- ===== TAB: DỊCH FOLDER ===== -->
+<div id="tab-folder" class="panel">
+
+  <div class="card">
+    <div class="card-title">📁 Dịch folder file TXT</div>
+    <div style="font-size:12px; color:var(--ash); margin-bottom:10px; line-height:1.6;">
+      Chọn folder chứa file <code>001.txt</code>, <code>002.txt</code>... → dịch từng file → lưu thành <code>Chương 1.txt</code>, <code>Chương 2.txt</code>... vào folder xuất.
+    </div>
+
+    <label style="margin-bottom:6px;">Folder nguồn (chứa file TXT gốc):</label>
+    <div style="display:flex; gap:8px; align-items:center; margin-bottom:10px;">
+      <input type="text" id="srcFolderName" value="Chưa chọn" readonly
+        style="flex:1; cursor:pointer; font-size:12px;" onclick="pickSrcFolder()" />
+      <button class="btn btn-secondary" onclick="pickSrcFolder()" style="padding:8px 12px; flex-shrink:0;">📂 Chọn</button>
+    </div>
+
+    <label style="margin-bottom:6px;">Folder xuất (lưu bản dịch):</label>
+    <div style="display:flex; gap:8px; align-items:center; margin-bottom:6px;">
+      <input type="text" id="outFolderName" value="Chưa chọn" readonly
+        style="flex:1; cursor:pointer; font-size:12px;" onclick="pickOutFolder()" />
+      <button class="btn btn-secondary" onclick="pickOutFolder()" style="padding:8px 12px; flex-shrink:0;">📂 Chọn</button>
+    </div>
+    <div id="folderPickStatus" style="font-size:11px; color:var(--ash); margin-bottom:10px;"></div>
+  </div>
+
+  <div class="card" id="folderFileListCard" style="display:none;">
+    <div class="card-title">
+      Danh sách file nhận dạng
+      <span class="badge" id="folderFileCount">0 file</span>
+    </div>
+    <div class="chapter-list" id="folderFileList"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Tiến trình dịch folder</div>
+    <div id="folderProgressSection" style="display:none;">
+      <div class="progress-text" id="folderProgressText">0 / 0 file</div>
+      <div class="progress-wrap">
+        <div class="progress-bar" id="folderProgressBar" style="width:0%"></div>
+      </div>
+      <div style="font-size:11px; color:var(--ash); margin-top:4px;" id="folderCurrentInfo">—</div>
+    </div>
+
+    <div id="folderErrorSummary" style="display:none; margin-top:8px; padding:6px 10px; background:rgba(139,26,26,0.08); border:1px solid rgba(139,26,26,0.25); border-radius:6px; font-size:12px; color:var(--red);">
+      <span id="folderErrorText"></span>
+      <button class="btn btn-danger" style="padding:4px 10px; font-size:11px; margin-left:8px;" onclick="retryAllFolderErrors()">🔄 Dịch lại tất cả lỗi</button>
+    </div>
+
+    <div style="margin-top:12px;">
+      <label style="margin-bottom:4px;">⏱ Delay giữa các file: <strong id="delayLabel">10 giây</strong></label>
+      <input type="range" id="folderDelay" min="5" max="60" value="10" step="5"
+        style="width:100%; accent-color:var(--gold);"
+        oninput="document.getElementById('delayLabel').textContent = this.value + ' giây'" />
+      <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--ash); margin-top:2px;">
+        <span>5s</span><span>15s</span><span>30s</span><span>45s</span><span>60s</span>
+      </div>
+      <div style="font-size:11px; color:var(--ash); margin-top:4px;">💡 Tăng delay nếu bị lỗi 429 (quá nhiều request). Khuyên dùng 10–30s.</div>
+    </div>
+
+    <div class="btn-row" style="margin-top:10px;">
+      <button class="btn btn-primary btn-full" id="btnFolderTranslate" onclick="startFolderTranslation()">
+        ⚡ Bắt đầu dịch folder
+      </button>
+      <button class="btn btn-danger" id="btnFolderStop" onclick="stopFolderTranslation()" style="display:none;">
+        ⏹ Dừng
+      </button>
+    </div>
+    <div id="folderLog" class="log-area" style="margin-top:10px;"></div>
+  </div>
+
+  <div class="card" id="folderProgressCard" style="display:none;">
+    <div class="card-title">Tiến độ từng file</div>
+    <div class="chapter-list" id="folderProgressList"></div>
+  </div>
+
+</div>
+
+<!-- ===== TAB: KẾT QUẢ ===== -->
+<div id="tab-result" class="panel">
+
+  <div class="card">
+    <div class="card-title">Kết quả dịch</div>
+    <div id="resultStats" style="margin-bottom:8px; font-size:12px; color:var(--ash);"></div>
+    <div class="result-box" id="resultBox">Chưa có kết quả dịch...</div>
+    <div class="btn-row" style="margin-top:10px;">
+      <button class="btn btn-primary" onclick="downloadResult()">💾 Tải xuống</button>
+      <button class="btn btn-secondary" onclick="copyResult()">📋 Sao chép</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== MODAL: XÁC NHẬN PHONG CÁCH DỊCH ===== -->
+<div class="modal-overlay" id="styleConfirmModal">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-header">
+      <h3>🎨 Chọn phong cách dịch</h3>
+      <button class="modal-close" onclick="closeStyleConfirm()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:13px; color:var(--ink); margin-bottom:10px;">Xác nhận lại phong cách trước khi bắt đầu dịch:</div>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <label class="style-confirm-opt" style="display:flex; align-items:center; gap:8px; padding:10px 12px; border:1px solid var(--border); border-radius:8px; cursor:pointer; font-size:13px; color:var(--ink);">
+          <input type="radio" name="styleConfirm" value="cotrang" style="width:auto; accent-color:var(--gold);" /> 🏯 Cổ Trang
+        </label>
+        <label class="style-confirm-opt" style="display:flex; align-items:center; gap:8px; padding:10px 12px; border:1px solid var(--border); border-radius:8px; cursor:pointer; font-size:13px; color:var(--ink);">
+          <input type="radio" name="styleConfirm" value="danquoc" style="width:auto; accent-color:var(--gold);" /> 🎩 Dân Quốc
+        </label>
+        <label class="style-confirm-opt" style="display:flex; align-items:center; gap:8px; padding:10px 12px; border:1px solid var(--border); border-radius:8px; cursor:pointer; font-size:13px; color:var(--ink);">
+          <input type="radio" name="styleConfirm" value="hiendai" style="width:auto; accent-color:var(--gold);" /> 🌆 Hiện Đại
+        </label>
+      </div>
+      <div class="divider"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" style="flex:1;" onclick="confirmStyleAndStart()">✅ OK</button>
+        <button class="btn btn-secondary" style="flex:1;" onclick="closeStyleConfirm()">Huỷ</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: PROMPT 1 ===== -->
+<div class="modal-overlay" id="promptModal1">
+  <div class="modal" style="max-width:800px;">
+    <div class="modal-header">
+      <h3>📝 Prompt 1 · Dịch (Trung → Việt)</h3>
+      <button class="modal-close" onclick="closePromptModal(1)">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="key-paste-hint" style="margin:0 0 8px;">Prompt hệ thống dùng khi dịch Trung → Việt. Tự đổi theo nút phong cách (Cổ Trang / Dân Quốc / Hiện Đại).</div>
+      <textarea id="systemPrompt" rows="18" readonly oninput="updatePromptInfo()" style="background:var(--readonly-bg); color:var(--ash); cursor:default; min-height:45vh;">VAI TRÒ
+
+Bạn là người dịch truyện chuyên nghiệp, chuyên dịch tiểu thuyết Trung
+Quốc sang tiếng Việt thuộc các thể loại Tiên Hiệp, Huyền Huyễn, Tu Chân
+và Kiếm Hiệp.
+
+Nhiệm vụ của bạn là dịch toàn bộ nguyên văn tiếng Trung sang tiếng Việt
+chính xác, tự nhiên, mạch lạc, đúng văn phong cổ trang. Bản dịch phải
+giữ nguyên nội dung, sắc thái và phong cách của nguyên tác.
+
+I. NGUYÊN TẮC ƯU TIÊN
+
+1.  Ưu tiên dịch đúng nghĩa và đầy đủ nội dung nguyên tác.
+2.  Tên riêng và thuật ngữ phải dùng âm Hán Việt chính xác, thống nhất.
+3.  Văn phong tiếng Việt phải tự nhiên, trôi chảy, dễ hiểu.
+4.  Giữ đúng bối cảnh, quan hệ nhân vật, cảm xúc và sắc thái câu văn.
+5.  Không tự ý thêm, bớt, suy diễn hoặc thay đổi nội dung.
+
+II. QUY TẮC DỊCH TÊN VÀ THUẬT NGỮ
+
+1.  Tên nhân vật, địa danh, tông môn, công pháp, pháp bảo, bí thuật,
+    cảnh giới và chức danh phải được chuyển sang âm Hán Việt phù hợp với
+    chữ Hán gốc.
+2.  Không dịch nghĩa tùy tiện tên riêng hoặc pháp bảo nếu nguyên tác
+    dùng tên gọi riêng.
+3.  Phải phân biệt những chữ Hán có âm hoặc nghĩa gần giống nhau. Không
+    được tự ý thay chữ hoặc đổi thuật ngữ.
+4.  Nếu người dùng cung cấp bảng tên và thuật ngữ, phải ưu tiên tuyệt
+    đối bảng đó và giữ thống nhất từ đầu đến cuối.
+5.  Một tên hoặc thuật ngữ đã xác định phải được dùng nhất quán trong
+    toàn bộ văn bản.
+6.  Không tự ý Việt hóa tên riêng theo cách hiện đại hoặc thay bằng từ
+    ngữ thông thường.
+7.  Nếu gặp tên riêng chưa rõ, căn cứ vào chữ Hán gốc để chuyển âm Hán
+    Việt; không đoán theo bản dịch máy.
+
+Ví dụ cần phân biệt: - 噬天鼎 = Phệ Thiên Đỉnh. - 吞天鼎 = Thôn Thiên
+Đỉnh. - 法则之灵 = Pháp Tắc Chi Linh. - 叶寒 = Diệp Hàn.
+
+III. VĂN PHONG VÀ XƯNG HÔ
+
+1.  Sử dụng văn phong cổ trang phù hợp với truyện Tiên Hiệp – Huyền
+    Huyễn.
+2.  Dùng cách xưng hô phù hợp như: ta, ngươi, hắn, nàng, đạo hữu, tiền
+    bối, hậu bối, sư huynh, sư tỷ, sư đệ, sư muội, trưởng lão, tông chủ…
+3.  Căn cứ vào quan hệ, địa vị, tuổi tác và tình huống để lựa chọn cách
+    xưng hô.
+4.  Không dịch nhầm sư huynh thành anh trai, sư tỷ thành chị gái hoặc
+    các danh xưng môn phái thành quan hệ gia đình.
+5.  Phân biệt đúng giới tính, vai vế và thân phận của nhân vật.
+6.  Không biến lời thoại cổ trang thành lời nói hiện đại, suồng sã.
+7.  Giữ nguyên sắc thái lời thoại: lạnh lùng, uy nghiêm, hài hước, kiêu
+    ngạo, phẫn nộ, sát phạt hoặc thân mật.
+
+IV. QUY TẮC DỊCH NỘI DUNG
+
+-   Dịch đầy đủ tất cả tiêu đề, lời dẫn, lời thoại, suy nghĩ, miêu tả,
+    thơ ca và nội dung thuộc nguyên tác.
+-   Không bỏ qua câu khó dịch hoặc đoạn lặp nếu đó là nội dung của tác
+    giả.
+-   Không tự rút gọn câu văn hoặc tóm tắt nội dung.
+-   Không thêm lời giải thích, bình luận hay tình tiết không có trong
+    nguyên tác.
+-   Giữ nguyên số liệu, thời gian, tên gọi, cấp bậc, cảnh giới, thứ tự
+    sự kiện và kết quả chiến đấu.
+-   Giữ đúng ngôi kể và góc nhìn của nguyên tác.
+-   Có thể điều chỉnh trật tự câu để tiếng Việt tự nhiên hơn, nhưng
+    không được làm thay đổi ý nghĩa.
+
+V. XỬ LÝ LỖI VÀ NỘI DUNG NGOÀI TRUYỆN
+
+1.  Dịch toàn bộ nội dung tiếng Trung sang tiếng Việt; không để sót chữ
+    Hán trong phần truyện, trừ trường hợp người dùng yêu cầu giữ nguyên.
+2.  Không để sót từ tiếng Anh hoặc ngôn ngữ khác nếu chúng có thể dịch
+    chính xác và thuộc nội dung cần dịch.
+3.  Sửa lỗi dấu câu và xuống dòng do định dạng nguồn gây ra, nhưng không
+    làm thay đổi nội dung.
+4.  Không tự ý xóa lời tác giả hoặc ghi chú nếu chưa xác định đó là nội
+    dung ngoài truyện.
+5.  Nếu có quảng cáo, đường link hoặc nội dung giới thiệu nền tảng rõ
+    ràng không thuộc truyện, có thể loại bỏ khi người dùng yêu cầu làm
+    sạch văn bản.
+
+VI. ĐỊNH DẠNG ĐẦU RA
+
+-   Giữ tiêu đề chương theo định dạng: Chương [số]: [Tên chương].
+-   Giữ thứ tự các đoạn và diễn biến của nguyên tác.
+-   Xuống dòng hợp lý giữa lời kể và lời thoại.
+-   Chỉ trả về bản dịch tiếng Việt hoàn chỉnh.
+-   Không thêm lời mở đầu, nhận xét, đánh giá hoặc giải thích quá trình
+    dịch.</textarea>
+      <div class="btn-row" style="margin-top:8px;">
+        <button class="btn btn-secondary" id="btnEditPrompt" onclick="editPrompt()" style="flex:1; font-size:13px; padding:9px 8px;">✏️ Sửa</button>
+        <button class="btn btn-jade" id="btnSavePrompt" onclick="savePrompt()" style="flex:1; font-size:13px; padding:9px 8px; display:none;">💾 Lưu</button>
+        <button class="btn btn-danger" id="btnResetPrompt" onclick="resetPrompt()" style="flex:1; font-size:13px; padding:9px 8px;">↺ Reset</button>
+        <button class="btn btn-secondary" onclick="document.getElementById('promptTxtInput1').click()" style="flex:1; font-size:13px; padding:9px 8px;">📂 Nhập từ file TXT</button>
+      </div>
+      <input type="file" id="promptTxtInput1" accept=".txt" style="display:none;" onchange="importPromptTxt(event, 1)" />
+      <div id="promptSaveStatus" style="font-size:12px; margin-top:6px; color:var(--jade); display:none;">✅ Đã lưu prompt</div>
+      <div class="divider"></div>
+      <button class="btn btn-primary btn-full" onclick="closePromptModal(1)">✅ Đóng</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: PROMPT 2 ===== -->
+<div class="modal-overlay" id="promptModal2">
+  <div class="modal" style="max-width:800px;">
+    <div class="modal-header">
+      <h3>🔎 Prompt 2 · Biên tập / Quét lại</h3>
+      <button class="modal-close" onclick="closePromptModal(2)">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="key-paste-hint" style="margin:0 0 8px;">Chạy sau khi dịch, trước khi xuất file. Danh sách tên nhân vật vẫn được gửi kèm; từ không dịch được hiện ở tab 📝 Note. Phần định dạng bảng liệt kê được tự thêm.</div>
+      <textarea id="systemPrompt2" rows="18" readonly oninput="updatePromptInfo()" style="background:var(--readonly-bg); color:var(--ash); cursor:default; min-height:45vh;"></textarea>
+      <div class="btn-row" style="margin-top:8px;">
+        <button class="btn btn-secondary" id="btnEditPrompt2" onclick="editPrompt2()" style="flex:1; font-size:13px; padding:9px 8px;">✏️ Sửa</button>
+        <button class="btn btn-jade" id="btnSavePrompt2" onclick="savePrompt2()" style="flex:1; font-size:13px; padding:9px 8px; display:none;">💾 Lưu</button>
+        <button class="btn btn-danger" id="btnResetPrompt2" onclick="resetPrompt2()" style="flex:1; font-size:13px; padding:9px 8px;">↺ Reset</button>
+        <button class="btn btn-secondary" onclick="document.getElementById('promptTxtInput2').click()" style="flex:1; font-size:13px; padding:9px 8px;">📂 Nhập từ file TXT</button>
+      </div>
+      <input type="file" id="promptTxtInput2" accept=".txt" style="display:none;" onchange="importPromptTxt(event, 2)" />
+      <div id="prompt2SaveStatus" style="font-size:12px; margin-top:6px; color:var(--jade); display:none;"></div>
+      <div class="divider"></div>
+      <button class="btn btn-primary btn-full" onclick="closePromptModal(2)">✅ Đóng</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: TÊN NHÂN VẬT ===== -->
+<div class="modal-overlay" id="nameSyncModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>👥 Đồng bộ tên nhân vật</h3>
+      <button class="modal-close" onclick="closeNameSync()">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Tự động trích xuất -->
+      <div style="margin-bottom:12px; padding:10px 12px; background:rgba(201,168,76,0.06); border:1px solid var(--border); border-radius:8px;">
+        <div style="font-size:12px; color:var(--gold-dim); font-weight:600; margin-bottom:8px; font-family:'Noto Serif SC',serif;">🔍 Tự động trích xuất tên</div>
+        <div style="display:flex; gap:6px; margin-bottom:6px;">
+          <label style="display:flex; align-items:center; gap:5px; cursor:pointer; flex:1; padding:7px 10px; border:1px solid var(--border); border-radius:6px; background:var(--readonly-bg); font-size:12px; color:var(--ink); transition:all 0.2s;" id="extractBasicLabel">
+            <input type="radio" name="extractMode" value="basic" checked onchange="updateExtractLabel()" style="width:auto; accent-color:var(--gold);" />
+            ⚡ Cơ bản <span style="font-size:10px; color:var(--ash); margin-left:2px;">(nhanh, ~3000 ký tự)</span>
+          </label>
+          <label style="display:flex; align-items:center; gap:5px; cursor:pointer; flex:1; padding:7px 10px; border:1px solid var(--border); border-radius:6px; background:var(--readonly-bg); font-size:12px; color:var(--ink); transition:all 0.2s;" id="extractDeepLabel">
+            <input type="radio" name="extractMode" value="deep" onchange="updateExtractLabel()" style="width:auto; accent-color:var(--gold);" />
+            🔬 Chính xác <span style="font-size:10px; color:var(--ash); margin-left:2px;">(quét toàn bộ văn bản)</span>
+          </label>
+        </div>
+        <div style="font-size:10px; color:var(--ash); margin-bottom:8px;" id="extractModeDesc">⚡ Trích xuất nhanh từ 3.000 ký tự đầu.</div>
+        <button class="btn btn-secondary btn-full" id="btnAutoExtract" onclick="autoExtractNames()">🔍 Bắt đầu trích xuất</button>
+      </div>
+
+      <!-- Nhập file TXT -->
+      <div style="margin-bottom:12px; padding:10px 12px; background:rgba(45,106,79,0.05); border:1px solid rgba(45,106,79,0.2); border-radius:8px;">
+        <div style="font-size:12px; color:var(--jade); font-weight:600; margin-bottom:6px; font-family:'Noto Serif SC',serif;">📄 Nhập từ file TXT</div>
+        <div style="font-size:11px; color:var(--ash); margin-bottom:8px;">Định dạng: mỗi dòng <code style="background:rgba(0,0,0,0.06); padding:1px 5px; border-radius:3px; font-size:11px;">Tên gốc|Tên Việt</code> — ví dụ: <code style="background:rgba(0,0,0,0.06); padding:1px 5px; border-radius:3px; font-size:11px;">韩立|Hàn Lập</code></div>
+        <label class="file-drop" id="nameTxtDrop" style="padding:12px; cursor:pointer;" ondragover="handleNameTxtDrag(event)" ondragleave="handleNameTxtDragLeave(event)" ondrop="handleNameTxtDrop(event)">
+          <div class="icon" style="font-size:20px; margin-bottom:4px;">📂</div>
+          <div style="font-size:12px;">Kéo thả hoặc nhấn để chọn file <strong>.txt</strong></div>
+          <input type="file" id="nameTxtInput" accept=".txt" style="display:none;" onchange="importNameTxt(event)" />
+        </label>
+        <div id="nameTxtStatus" style="font-size:11px; margin-top:6px; display:none;"></div>
+      </div>
+
+      <!-- Nút thêm / xóa -->
+      <div class="btn-row" style="margin-bottom:12px;">
+        <button class="btn btn-jade" onclick="addNameRow()">+ Thêm dòng</button>
+        <button class="btn btn-danger" onclick="clearNames()">🗑️ Xóa hết</button>
+        <button class="btn btn-secondary" onclick="downloadNamesTxt()">💾 Tải file TXT tên</button>
+      </div>
+
+      <div style="overflow-x:auto;">
+        <table class="name-table">
+          <thead>
+            <tr>
+              <th>Tên gốc (中文)</th>
+              <th>Tên Việt</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="nameTableBody"></tbody>
+        </table>
+      </div>
+      <div class="divider"></div>
+      <button class="btn btn-primary btn-full" onclick="saveNames()">✅ Lưu & Đóng</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+const state = {
+  apiKeys: [],
+  currentKeyIndex: 0,
+  chapters: [],
+  translatedChapters: {},
+  nameMap: {},
+  mode: 'chapter',       // mặc định: từng chương
+  isRunning: false,
+  shouldStop: false,
+  wasStopped: false,     // true nếu bị dừng giữa chừng
+  quotaExhausted: false, // true nếu dừng do hết quota API
+  rawMode: null,         // { chunks, result, doneCount, total } — dùng khi văn bản không phân chương được (mode 'all')
+  dirHandle: null,
+};
+
+// Kiểm tra thông điệp lỗi có phải do hết quota / rate limit không
+function isQuotaError(msg) {
+  const m = (msg || '').toLowerCase();
+  return m.includes('quota') || m.includes('429') || m.includes('rate') || m.includes('exhausted') || m.includes('insufficient_quota') || m.includes('billing');
+}
+
+// ============================================================
+// KHỞI ĐỘNG - load dữ liệu đã lưu
+// ============================================================
+window.addEventListener('DOMContentLoaded', () => {
+  loadKeysFromStorage();
+  loadNamesFromStorage();
+  loadSettingsFromStorage();   // ghi nhớ model + folder
+  loadPromptFromStorage();     // ghi nhớ prompt hệ thống đã lưu
+
+  // Đếm ký tự textarea live
+  const src = document.getElementById('sourceText');
+  const counter = document.getElementById('charCount');
+  function updateCharCount() {
+    const n = src.value.length;
+    counter.textContent = n.toLocaleString() + ' ký tự';
+  }
+  src.addEventListener('input', updateCharCount);
+  updateCharCount();
+});
+
+// ============================================================
+// TABS
+// ============================================================
+function switchTab(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+// ============================================================
+// API KEY MANAGEMENT
+// ============================================================
+const keyField = document.getElementById('keyInputField');
+const keyContainer = document.getElementById('keyTagsContainer');
+
+keyField.addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ',') {
+    e.preventDefault();
+    const val = keyField.value.trim().replace(/,/g, '');
+    if (val) addKey(val);
+    keyField.value = '';
+  }
+  if (e.key === 'Backspace' && keyField.value === '' && state.apiKeys.length > 0) {
+    removeKey(state.apiKeys.length - 1);
+  }
+});
+
+keyField.addEventListener('paste', e => {
+  e.preventDefault();
+  const text = e.clipboardData.getData('text');
+  const keys = text.split(/[,\n\r]+/).map(k => k.trim()).filter(Boolean);
+  keys.forEach(k => addKey(k));
+});
+
+keyContainer.addEventListener('focus', () => keyContainer.classList.add('focused'), true);
+keyContainer.addEventListener('blur', () => keyContainer.classList.remove('focused'), true);
+
+function addKey(key) {
+  if (!key || state.apiKeys.includes(key)) return;
+  state.apiKeys.push(key);
+  renderKeys();
+  saveKeysToStorage();
+}
+
+function removeKey(idx) {
+  state.apiKeys.splice(idx, 1);
+  renderKeys();
+  saveKeysToStorage();
+}
+
+function saveKeysToStorage() {
+  try { localStorage.setItem('tien_dich_openai_keys', JSON.stringify(state.apiKeys)); } catch(e) {}
+}
+
+function loadKeysFromStorage() {
+  try {
+    const saved = localStorage.getItem('tien_dich_openai_keys');
+    if (saved) {
+      const keys = JSON.parse(saved);
+      keys.forEach(k => { if (k && !state.apiKeys.includes(k)) state.apiKeys.push(k); });
+      if (state.apiKeys.length > 0) renderKeys();
+    }
+  } catch(e) {}
+}
+
+// Ghi nhớ model và folder label
+function loadSettingsFromStorage() {
+  try {
+    const saved = localStorage.getItem('tien_dich_settings');
+    if (!saved) return;
+    const s = JSON.parse(saved);
+    if (typeof s.scan2 === 'boolean') {
+      const t = document.getElementById('scan2Toggle');
+      if (t) t.checked = s.scan2;
+    }
+    if (s.model) {
+      const sel = document.getElementById('modelSelect');
+      if (sel) {
+        // set selected option
+        const opt = sel.querySelector(`option[value="${s.model}"]`);
+        if (opt) opt.selected = true;
+      }
+    }
+    if (s.folderName) {
+      const btn = document.getElementById('outputFolderName');
+      if (btn) btn.value = '📂 ' + s.folderName + ' (cần chọn lại)';
+      const st = document.getElementById('folderStatus');
+      if (st) { st.textContent = '⚠️ Folder trước: ' + s.folderName + ' — Nhấn Chọn để chọn lại.'; st.style.color = 'var(--ash)'; }
+    }
+    if (s.srcFolderName) {
+      const el = document.getElementById('srcFolderName');
+      if (el) el.value = '📂 ' + s.srcFolderName + ' (cần chọn lại)';
+    }
+    if (s.outFolderName) {
+      const el = document.getElementById('outFolderName');
+      if (el) el.value = '📂 ' + s.outFolderName + ' (cần chọn lại)';
+    }
+  } catch(e) {}
+}
+
+function saveSettingsToStorage() {
+  try {
+    const sel = document.getElementById('modelSelect');
+    const s = {
+      model: sel ? sel.value : '',
+      folderName: state.dirHandle ? state.dirHandle.name : (JSON.parse(localStorage.getItem('tien_dich_settings') || '{}').folderName || ''),
+      srcFolderName: folderState.srcHandle ? folderState.srcHandle.name : (JSON.parse(localStorage.getItem('tien_dich_settings') || '{}').srcFolderName || ''),
+      outFolderName: folderState.outHandle ? folderState.outHandle.name : (JSON.parse(localStorage.getItem('tien_dich_settings') || '{}').outFolderName || ''),
+      scan2: isScanEnabled(),
+    };
+    localStorage.setItem('tien_dich_settings', JSON.stringify(s));
+  } catch(e) {}
+}
+
+function renderKeys() {
+  // Remove all tags
+  document.querySelectorAll('.key-tag').forEach(el => el.remove());
+  state.apiKeys.forEach((key, idx) => {
+    const tag = document.createElement('div');
+    tag.className = 'key-tag';
+    tag.id = `keyTag_${idx}`;
+    const display = key.length > 16 ? key.slice(0, 8) + '...' + key.slice(-6) : key;
+    tag.innerHTML = `<div class="status-dot" id="dot_${idx}"></div><span title="${key}">${display}</span><span class="remove-key" onclick="removeKey(${idx})">×</span>`;
+    keyContainer.insertBefore(tag, keyField);
+  });
+  // Cập nhật đếm key
+  const n = state.apiKeys.length;
+  const el = document.getElementById('keyCountDisplay');
+  if (el) el.textContent = n === 0 ? '0 API key' : `✅ ${n} API key`;
+}
+
+function clearAllKeys() {
+  if (!confirm('Xóa tất cả API key đã lưu?')) return;
+  state.apiKeys = [];
+  renderKeys();
+  try { localStorage.removeItem('tien_dich_openai_keys'); } catch(e) {}
+}
+
+async function checkAllKeys() {
+  if (state.apiKeys.length === 0) { alert('Chưa có API key nào!'); return; }
+  const log = document.getElementById('keyLog');
+  log.style.display = 'block';
+  log.innerHTML = '';
+  const model = document.getElementById('modelSelect').value;
+
+  for (let i = 0; i < state.apiKeys.length; i++) {
+    const dot = document.getElementById(`dot_${i}`);
+    if (dot) dot.className = 'status-dot checking';
+    appendLog(log, `🔍 Kiểm tra key ${i+1}...`, 'info');
+    try {
+      const result = await callGemini(state.apiKeys[i], model, 'Reply with just OK', null, true);
+      if (dot) dot.className = 'status-dot ok';
+      appendLog(log, `✅ Key ${i+1}: Hoạt động → "${result.slice(0,40)}"`, 'ok');
+    } catch(err) {
+      if (dot) dot.className = 'status-dot err';
+      appendLog(log, `❌ Key ${i+1}: Lỗi → ${err.message}`, 'err');
+    }
+  }
+}
+
+// ============================================================
+// OPENAI API CALL
+// ============================================================
+async function callGemini(apiKey, model, prompt, systemPrompt, isCheck = false) {
+  const url = 'https://api.openai.com/v1/chat/completions';
+  const messages = [];
+  if (systemPrompt) messages.push({ role: 'system', content: systemPrompt });
+  messages.push({ role: 'user', content: prompt });
+  const body = {
+    model: model,
+    messages: messages,
+    temperature: 0.3,
+    max_tokens: isCheck ? 50 : 3000
+  };
+  const resp = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`
+    },
+    body: JSON.stringify(body)
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    const msg = err?.error?.message || `HTTP ${resp.status}`;
+    throw new Error(msg);
+  }
+  const data = await resp.json();
+  const text = data?.choices?.[0]?.message?.content;
+  if (!text) throw new Error('Không có phản hồi từ model');
+  return text;
+}
+
+// Key rotation
+async function callWithRotation(prompt, systemPrompt) {
+  if (state.apiKeys.length === 0) throw new Error('Chưa có API key!');
+  const model = document.getElementById('modelSelect').value;
+  const sysPr = (systemPrompt !== undefined && systemPrompt !== null) ? systemPrompt : document.getElementById('systemPrompt').value;
+  let attempts = 0;
+  while (attempts < state.apiKeys.length) {
+    const idx = state.currentKeyIndex % state.apiKeys.length;
+    const key = state.apiKeys[idx];
+    document.getElementById('currentKeyInfo').textContent = `Key đang dùng: Key ${idx+1} (${key.slice(0,8)}...)`;
+    try {
+      return await callGemini(key, model, prompt, sysPr);
+    } catch(err) {
+      const msg = err.message.toLowerCase();
+      if (msg.includes('quota') || msg.includes('429') || msg.includes('rate') || msg.includes('exhausted') || msg.includes('insufficient_quota') || msg.includes('billing')) {
+        appendLog(document.getElementById('translateLog'), `⚠️ Key ${idx+1} hết quota, chuyển key...`, 'warn');
+        const dot = document.getElementById(`dot_${idx}`);
+        if (dot) dot.className = 'status-dot err';
+        state.currentKeyIndex++;
+        attempts++;
+      } else {
+        throw err;
+      }
+    }
+  }
+  throw new Error('Tất cả API key đã hết quota!');
+}
+
+// ============================================================
+// FILE / TEXT INPUT
+// ============================================================
+function loadFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (file.name.toLowerCase().endsWith('.epub')) {
+    loadEpub(file);
+  } else {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      document.getElementById('sourceText').value = ev.target.result;
+      document.getElementById('epubInfo').style.display = 'none';
+      appendLog(document.getElementById('translateLog'), `📂 Đã tải file: ${file.name}`, 'ok');
+    };
+    reader.readAsText(file, 'UTF-8');
+  }
+}
+
+// ============================================================
+// EPUB PARSER
+// ============================================================
+async function loadEpub(file) {
+  const infoEl = document.getElementById('epubInfo');
+  infoEl.style.display = 'block';
+  infoEl.textContent = '📖 Đang đọc file EPUB...';
+
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    const zip = await JSZip.loadAsync(arrayBuffer);
+
+    // 1. Tìm container.xml để xác định đường dẫn OPF
+    const containerXml = await zip.file('META-INF/container.xml').async('text');
+    const contDoc = new DOMParser().parseFromString(containerXml, 'application/xml');
+    const opfPath = contDoc.querySelector('rootfile').getAttribute('full-path');
+    const opfBase = opfPath.includes('/') ? opfPath.slice(0, opfPath.lastIndexOf('/') + 1) : '';
+
+    // 2. Đọc OPF để lấy danh sách spine (thứ tự file)
+    const opfText = await zip.file(opfPath).async('text');
+    const opfDoc = new DOMParser().parseFromString(opfText, 'application/xml');
+
+    // Build manifest map: id → href
+    const manifestMap = {};
+    opfDoc.querySelectorAll('manifest item').forEach(item => {
+      manifestMap[item.getAttribute('id')] = item.getAttribute('href');
+    });
+
+    // Spine: thứ tự idref
+    const spineItems = [...opfDoc.querySelectorAll('spine itemref')].map(r => r.getAttribute('idref'));
+
+    // 3. Cố tìm mục lục TOC (toc.ncx hoặc nav document)
+    // Ưu tiên nav (EPUB3)
+    let tocMap = {}; // href_filename → title
+    const navId = opfDoc.querySelector('manifest item[properties~="nav"]')?.getAttribute('id');
+    if (navId && manifestMap[navId]) {
+      const navHref = opfBase + manifestMap[navId];
+      const navText = await zip.file(navHref)?.async('text') || '';
+      const navDoc = new DOMParser().parseFromString(navText, 'application/xhtml+xml');
+      navDoc.querySelectorAll('nav a, nav li a').forEach(a => {
+        let href = a.getAttribute('href') || '';
+        href = href.split('#')[0]; // bỏ fragment
+        if (href) tocMap[href] = a.textContent.trim();
+      });
+    }
+    // Fallback: toc.ncx (EPUB2)
+    if (Object.keys(tocMap).length === 0) {
+      const ncxId = opfDoc.querySelector('manifest item[media-type="application/x-dtbncx+xml"]')?.getAttribute('id')
+                  || [...opfDoc.querySelectorAll('manifest item')].find(i => i.getAttribute('href')?.includes('.ncx'))?.getAttribute('id');
+      if (ncxId && manifestMap[ncxId]) {
+        const ncxText = await zip.file(opfBase + manifestMap[ncxId])?.async('text') || '';
+        const ncxDoc = new DOMParser().parseFromString(ncxText, 'application/xml');
+        ncxDoc.querySelectorAll('navPoint').forEach(np => {
+          const src = np.querySelector('content')?.getAttribute('src') || '';
+          const href = src.split('#')[0];
+          const label = np.querySelector('navLabel text')?.textContent?.trim() || '';
+          if (href) tocMap[href] = label;
+        });
+      }
+    }
+
+    // 4. Đọc nội dung từng spine item, ghép lại
+    // Lọc: chỉ lấy chương bắt đầu bằng "Chương N" (số Ả Rập)
+    const chapterPattern = /^Chương\s+\d+/i;
+    const allChapters = [];
+    let skippedCount = 0;
+
+    for (const idref of spineItems) {
+      const relHref = manifestMap[idref];
+      if (!relHref) continue;
+      const fullHref = opfBase + relHref;
+      const hrefFilename = relHref.includes('/') ? relHref.slice(relHref.lastIndexOf('/') + 1) : relHref;
+
+      // Xác định title từ TOC
+      let tocTitle = tocMap[relHref] || tocMap[hrefFilename] || '';
+
+      const htmlText = await zip.file(fullHref)?.async('text') || '';
+      if (!htmlText) continue;
+
+      const htmlDoc = new DOMParser().parseFromString(htmlText, 'application/xhtml+xml');
+
+      // Lấy tiêu đề từ heading tag hoặc TOC
+      let chapterTitle = tocTitle;
+      if (!chapterTitle) {
+        const heading = htmlDoc.querySelector('h1,h2,h3,h4');
+        chapterTitle = heading ? heading.textContent.trim() : '';
+      }
+
+      // Nếu không có tiêu đề, thử dùng title tag
+      if (!chapterTitle) {
+        chapterTitle = htmlDoc.querySelector('title')?.textContent?.trim() || '';
+      }
+
+      // Kiểm tra: chỉ lấy nếu tiêu đề bắt đầu bằng "Chương N"
+      if (chapterTitle && !chapterPattern.test(chapterTitle)) {
+        skippedCount++;
+        continue;
+      }
+
+      // Extract plain text
+      // Xóa script, style
+      htmlDoc.querySelectorAll('script,style').forEach(el => el.remove());
+      let content = '';
+      // Dùng body text, join paragraphs với newline
+      const paras = htmlDoc.querySelectorAll('p, div, br');
+      if (paras.length > 0) {
+        const lines = [];
+        htmlDoc.querySelectorAll('p, h1, h2, h3, h4').forEach(el => {
+          const t = el.textContent.trim();
+          if (t) lines.push(t);
+        });
+        content = lines.join('\n');
+      } else {
+        content = (htmlDoc.body?.textContent || htmlDoc.documentElement?.textContent || '').trim();
+      }
+
+      if (!content) continue;
+
+      // Nếu chưa có tiêu đề nhưng content bắt đầu bằng "Chương N" → OK
+      if (!chapterTitle) {
+        const firstLine = content.split('\n')[0].trim();
+        if (!chapterPattern.test(firstLine)) {
+          skippedCount++;
+          continue;
+        }
+        chapterTitle = firstLine;
+      }
+
+      // Parse số chương từ tiêu đề
+      const numMatch = chapterTitle.match(/\d+/);
+      const chNum = numMatch ? parseInt(numMatch[0]) : (allChapters.length + 1);
+
+      allChapters.push({
+        num: chNum,
+        title: chapterTitle,
+        content: chapterTitle + '\n' + content,
+        status: 'wait'
+      });
+    }
+
+    if (allChapters.length === 0) {
+      infoEl.style.color = 'var(--red)';
+      infoEl.textContent = `❌ Không tìm thấy chương nào bắt đầu bằng "Chương N". Đã bỏ qua ${skippedCount} mục (giới thiệu, văn án...).`;
+      return;
+    }
+
+    // Ghép toàn bộ text vào sourceText (để tham chiếu)
+    const fullText = allChapters.map(ch => ch.content).join('\n\n');
+    document.getElementById('sourceText').value = fullText;
+    document.getElementById('sourceText').dispatchEvent(new Event('input'));
+
+    // Populate state.chapters trực tiếp
+    state.chapters = allChapters;
+
+    // Hiển thị kết quả
+    infoEl.style.color = 'var(--jade)';
+    infoEl.textContent = `✅ EPUB: đã đọc ${allChapters.length} chương · bỏ qua ${skippedCount} mục (giới thiệu/văn án...)`;
+
+    // Render chapter list
+    renderChapterList();
+    document.getElementById('chapterDetectCard').style.display = 'block';
+    document.getElementById('chapterCount').textContent = `${allChapters.length} chương`;
+
+    appendLog(document.getElementById('translateLog'), `📖 Đã tải EPUB: ${file.name} · ${allChapters.length} chương`, 'ok');
+
+  } catch(err) {
+    infoEl.style.color = 'var(--red)';
+    infoEl.textContent = `❌ Lỗi đọc EPUB: ${err.message}`;
+    console.error('EPUB error:', err);
+  }
+}
+
+function handleDrag(e) {
+  e.preventDefault();
+  document.getElementById('fileDrop').classList.add('drag');
+}
+function handleDragLeave() {
+  document.getElementById('fileDrop').classList.remove('drag');
+}
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('fileDrop').classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (!file) return;
+  if (file.name.toLowerCase().endsWith('.epub')) {
+    loadEpub(file);
+  } else if (file.name.toLowerCase().endsWith('.txt')) {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      document.getElementById('sourceText').value = ev.target.result;
+      document.getElementById('epubInfo').style.display = 'none';
+    };
+    reader.readAsText(file, 'UTF-8');
+  }
+}
+
+function clearSource() {
+  document.getElementById('sourceText').value = '';
+  document.getElementById('chapterDetectCard').style.display = 'none';
+  state.chapters = [];
+}
+
+async function pasteQuickSource() {
+  try {
+    const text = await navigator.clipboard.readText();
+    document.getElementById('sourceText').value = text;
+    document.getElementById('sourceText').dispatchEvent(new Event('input'));
+  } catch(e) {
+    alert('Không thể đọc clipboard.\nVui lòng dán thủ công (Ctrl+V).');
+  }
+}
+
+// ============================================================
+// CHAPTER DETECTION
+// ============================================================
+function detectChapters() {
+  const text = document.getElementById('sourceText').value.trim();
+  if (!text) { alert('Chưa có văn bản!'); return; }
+
+  const patterns = [
+    // Tiếng Trung: 第X章 (số chữ hoặc số Ả Rập, có/không có tiêu đề)
+    /^第[零一二三四五六七八九十百千万０-９\d]+章\s*.*/gm,
+    // 【第X章】
+    /^[【\[【]?第[零一二三四五六七八九十百千万０-９\d]+章[】\]】]?.*/gm,
+    // Chương N (tiếng Việt)
+    /^[Cc]hương\s+\d+.*/gm,
+    // CHƯƠNG N
+    /^CHƯƠNG\s+\d+.*/gm,
+    // Chapter N (tiếng Anh)
+    /^Chapter\s+\d+.*/gim,
+    // 卷X
+    /^卷[零一二三四五六七八九十百千万\d]+.*/gm,
+    // Dạng: 第X回
+    /^第[零一二三四五六七八九十百千万\d]+回\s*.*/gm,
+    // Dạng số đơn: "1." hoặc "1、" đầu dòng (fallback)
+    // (chỉ dùng nếu không có pattern nào khác)
+  ];
+
+  let allMatches = [];
+  for (const pat of patterns) {
+    const matches = [...text.matchAll(pat)];
+    allMatches.push(...matches.map(m => ({ index: m.index, title: m[0].trim() })));
+  }
+
+  // Nếu không tìm được gì, thử fallback: số đầu dòng kiểu "1." "2." ...
+  if (allMatches.length === 0) {
+    const fallback = /^(\d{1,4})[\.、。\s]\s*\S.*/gm;
+    const fb = [...text.matchAll(fallback)];
+    // Chỉ dùng fallback nếu có ít nhất 2 dòng số liên tiếp
+    if (fb.length >= 2) {
+      allMatches.push(...fb.map(m => ({ index: m.index, title: m[0].trim() })));
+    }
+  }
+
+  // Sort by position, deduplicate gần nhau
+  allMatches.sort((a, b) => a.index - b.index);
+  allMatches = allMatches.filter((m, i) => i === 0 || Math.abs(m.index - allMatches[i-1].index) > 10);
+
+  // Helper: parse số chương thực từ tiêu đề
+  const chineseNums = {'零':0,'一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9,'十':10,'百':100,'千':1000,'万':10000};
+  function parseChapterNum(title) {
+    // Ưu tiên số Ả Rập (ví dụ: 第31章, Chương 31, Chapter 31)
+    const arabic = title.match(/\d+/);
+    if (arabic) return parseInt(arabic[0], 10);
+    // Thử parse số Hán tự (第三十一章 → 31)
+    const hanMatch = title.match(/第([零一二三四五六七八九十百千万]+)[章回卷]/);
+    if (hanMatch) {
+      const s = hanMatch[1];
+      let num = 0, tmp = 0;
+      for (const c of s) {
+        const v = chineseNums[c] ?? 0;
+        if (v >= 100) { tmp = (tmp || 1) * v; num += tmp; tmp = 0; }
+        else if (v === 10) { tmp = tmp ? tmp * 10 : 10; }
+        else { tmp += v; }
+      }
+      return num + tmp || null;
+    }
+    return null;
+  }
+
+  state.chapters = allMatches.map((m, i) => {
+    const nextIdx = i < allMatches.length - 1 ? allMatches[i+1].index : text.length;
+    const realNum = parseChapterNum(m.title);
+    return {
+      num: realNum !== null ? realNum : (i + 1),
+      title: m.title,
+      content: text.slice(m.index, nextIdx).trim(),
+      status: 'wait'
+    };
+  });
+
+  if (state.chapters.length === 0) {
+    state.chapters = [{ num: 1, title: 'Toàn bộ văn bản', content: text, status: 'wait' }];
+    alert('Không tìm thấy định dạng chương chuẩn.\n→ Sẽ xử lý toàn bộ văn bản như 1 chương.');
+  } else {
+    alert(`✅ Đã nhận dạng ${state.chapters.length} chương!\n\nXem danh sách bên dưới.`);
+  }
+
+  renderChapterList();
+  document.getElementById('chapterDetectCard').style.display = 'block';
+  document.getElementById('chapterCount').textContent = `${state.chapters.length} chương`;
+}
+
+function renderChapterList() {
+  const list = document.getElementById('chapterListDisplay');
+  list.innerHTML = '';
+  state.chapters.forEach((ch, i) => {
+    const el = document.createElement('div');
+    el.className = 'chapter-item';
+    const shortTitle = ch.title.slice(0, 40) + (ch.title.length > 40 ? '...' : '');
+    const charCount = ch.content.length.toLocaleString();
+    el.innerHTML = `<span class="ch-num">Chương ${ch.num}</span><span class="ch-title">${shortTitle}</span><span class="ch-status" style="color:var(--ash);font-size:10px;white-space:nowrap;">${charCount} ký</span>`;
+    list.appendChild(el);
+  });
+}
+
+// ============================================================
+// TRANSLATION MODE
+// ============================================================
+function setMode(mode) {
+  state.mode = mode;
+  document.getElementById('modeAll').classList.toggle('active', mode === 'all');
+  document.getElementById('modeChapter').classList.toggle('active', mode === 'chapter');
+  document.getElementById('modeDesc').textContent = mode === 'all'
+    ? 'Dịch toàn bộ văn bản → xuất 1 file (ví dụ: Chương 1-20.txt)'
+    : 'Dịch từng chương → mỗi chương xuất 1 file riêng (ví dụ: Chương 1.txt)';
+  const fnWrap = document.getElementById('customFilenameWrap');
+  if (fnWrap) fnWrap.style.display = mode === 'all' ? 'block' : 'none';
+}
+
+// Lấy tên file tải xuống: dùng tên người dùng đặt (nếu có) trong chế độ "Dịch tất cả", nếu không thì dùng tên mặc định
+function getCustomFilename(defaultName) {
+  const el = document.getElementById('customFilenameAll');
+  if (!el) return defaultName;
+  let name = el.value.trim();
+  if (!name) return defaultName;
+  name = name.replace(/[\\/:*?"<>|]/g, '_'); // loại bỏ ký tự không hợp lệ trong tên file
+  if (!/\.[a-zA-Z0-9]{1,5}$/.test(name)) name += '.txt';
+  return name;
+}
+
+// ============================================================
+// TRANSLATION CORE
+// ============================================================
+ // Bấm "Bắt đầu dịch" → hiện bảng chọn lại phong cách → OK mới bắt đầu dịch
+const STYLE_NAMES = { cotrang: 'Cổ Trang', danquoc: 'Dân Quốc', hiendai: 'Hiện Đại' };
+
+function startTranslation() {
+  const text = document.getElementById('sourceText').value.trim();
+  if (!text) { alert('Chưa có văn bản để dịch!'); return; }
+  if (state.apiKeys.length === 0) { alert('Chưa nhập API key!'); return; }
+  const current = getActivePreset();
+  document.querySelectorAll('input[name="styleConfirm"]').forEach(r => { r.checked = (r.value === current); });
+  document.getElementById('styleConfirmModal').classList.add('show');
+}
+
+function closeStyleConfirm() {
+  document.getElementById('styleConfirmModal').classList.remove('show');
+}
+
+function confirmStyleAndStart() {
+  const chosen = document.querySelector('input[name="styleConfirm"]:checked')?.value;
+  if (!chosen) { alert('Vui lòng chọn phong cách dịch!'); return; }
+  // Chỉ áp dụng lại preset khi đổi phong cách (giữ nguyên prompt đã tự sửa nếu chọn đúng phong cách hiện tại)
+  if (chosen !== getActivePreset()) applyStylePreset(chosen);
+  closeStyleConfirm();
+  const notice = document.getElementById('styleNotice');
+  notice.textContent = `🎨 Bạn đang dịch theo phong cách ${STYLE_NAMES[chosen]}` + (isScanEnabled() ? ' · có quét Prompt 2' : '');
+  notice.style.display = 'block';
+  runStartTranslation();
+}
+
+async function runStartTranslation() {
+  const text = document.getElementById('sourceText').value.trim();
+  if (!text) { alert('Chưa có văn bản để dịch!'); return; }
+  if (state.apiKeys.length === 0) { alert('Chưa nhập API key!'); return; }
+  if (state.chapters.length === 0) detectChapters();
+  
+  state.isRunning = true;
+  state.shouldStop = false;
+  state.wasStopped = false;
+  state.quotaExhausted = false;
+  state.translatedChapters = {};
+  state.rawMode = null;
+  clearNotes('tr');
+  
+  document.getElementById('btnTranslate').style.display = 'none';
+  document.getElementById('btnStop').style.display = 'inline-flex';
+  document.getElementById('btnContinue').style.display = 'none';
+  document.getElementById('progressSection').style.display = 'block';
+  document.getElementById('quotaNotice').style.display = 'none';
+
+  // Save model choice
+  saveSettingsToStorage();
+
+  const log = document.getElementById('translateLog');
+  log.innerHTML = '';
+
+  if (state.mode === 'all') {
+    await translateAll(text, log);
+  } else {
+    await translateByChapter(log);
+  }
+
+  state.isRunning = false;
+  document.getElementById('btnTranslate').style.display = 'inline-flex';
+  document.getElementById('btnStop').style.display = 'none';
+  finishTranslationUI();
+}
+
+function stopTranslation() {
+  state.shouldStop = true;
+  state.wasStopped = true;
+  appendLog(document.getElementById('translateLog'), '⏹ Đang dừng...', 'warn');
+}
+
+// Cập nhật hiển thị nút Tiếp tục / thông báo hết quota sau khi 1 lượt dịch (hoặc tiếp tục) kết thúc
+function finishTranslationUI() {
+  const hasPendingChapters = state.chapters.some(ch => ch.status === 'wait' || ch.status === 'doing' || ch.status === 'error');
+  const hasPendingRaw = !!(state.rawMode && state.rawMode.doneCount < state.rawMode.total);
+  const hasPending = hasPendingChapters || hasPendingRaw;
+  document.getElementById('btnContinue').style.display = (state.wasStopped && hasPending) ? 'inline-flex' : 'none';
+  document.getElementById('quotaNotice').style.display = state.quotaExhausted ? 'block' : 'none';
+}
+
+async function continueTranslation() {
+  if (state.isRunning) return;
+  if (state.apiKeys.length === 0) { alert('Chưa nhập API key!'); return; }
+  const hasPendingRaw = !!(state.rawMode && state.rawMode.doneCount < state.rawMode.total);
+  if (state.chapters.length === 0 && !hasPendingRaw) { alert('Không có phần nào để dịch tiếp!'); return; }
+
+  state.isRunning = true;
+  state.shouldStop = false;
+  state.wasStopped = false;
+  state.quotaExhausted = false;
+
+  document.getElementById('btnTranslate').style.display = 'none';
+  document.getElementById('btnStop').style.display = 'inline-flex';
+  document.getElementById('btnContinue').style.display = 'none';
+  document.getElementById('quotaNotice').style.display = 'none';
+
+  const log = document.getElementById('translateLog');
+  appendLog(log, '▶▶ Tiếp tục dịch từ chỗ đã dừng...', 'info');
+
+  if (hasPendingRaw) {
+    await continueTranslateAllRaw(log);
+  } else if (state.mode === 'all') {
+    await continueTranslateAllChapters(log);
+  } else {
+    await translateByChapterContinue(log);
+  }
+
+  state.isRunning = false;
+  document.getElementById('btnTranslate').style.display = 'inline-flex';
+  document.getElementById('btnStop').style.display = 'none';
+  finishTranslationUI();
+}
+
+// Dịch tiếp các chương chưa dịch hoặc bị lỗi (chế độ "Từng chương")
+async function translateByChapterContinue(log) {
+  document.getElementById('chapterProgressCard').style.display = 'block';
+  updateProgress(state.chapters.filter(ch => ch.status === 'done').length, state.chapters.length);
+  await runChapterModeLoop(log);
+}
+
+async function translateByChapter(log) {
+  if (state.chapters.length === 0) {
+    appendLog(log, '❌ Chưa nhận dạng chương!', 'err');
+    return;
+  }
+
+  const total = state.chapters.length;
+  document.getElementById('chapterProgressCard').style.display = 'block';
+  renderChapterProgress();
+
+  appendLog(log, `📑 Bắt đầu dịch ${total} chương...`, 'info');
+  updateProgress(0, total);
+
+  await runChapterModeLoop(log);
+}
+
+// Vòng lặp dịch từng chương dùng chung cho cả "Bắt đầu dịch" và "Tiếp tục dịch" (chế độ "Từng chương")
+// Mỗi chương dịch xong sẽ xuất file riêng ngay lập tức
+async function runChapterModeLoop(log) {
+  const total = state.chapters.length;
+
+  for (let i = 0; i < state.chapters.length; i++) {
+    if (state.shouldStop) { appendLog(log, '⏹ Đã dừng. Nhấn "Tiếp tục dịch" để dịch tiếp.', 'warn'); break; }
+    const ch = state.chapters[i];
+    if (ch.status === 'done') continue;   // bỏ qua chương đã dịch xong khi tiếp tục
+    ch.status = 'doing';
+    renderChapterProgress();
+
+    appendLog(log, `⚡ Đang dịch Chương ${ch.num}: ${ch.title.slice(0,20)}...`, 'info');
+
+    try {
+      let [translated, notes, scanned] = await translateContent(ch.content, () => state.shouldStop);
+
+      if (state.shouldStop) { ch.status = 'wait'; break; }
+
+      translated = applyNameMap(translated);
+      ch.status = 'done';
+      state.translatedChapters[i] = translated;
+      recordNotes('tr', `Chương ${ch.num}`, notes, scanned, log);
+
+      // Download chapter file — tên file = "Chương N.txt"
+      const fname = `Chương ${ch.num}.txt`;
+      downloadText(translated, fname);
+      appendLog(log, `💾 Xuất: ${fname}`, 'ok');
+    } catch(err) {
+      ch.status = 'error';
+      appendLog(log, `❌ Chương ${ch.num} lỗi: ${err.message}`, 'err');
+      if (isQuotaError(err.message)) {
+        state.quotaExhausted = true;
+        state.shouldStop = true;
+        state.wasStopped = true;
+        appendLog(log, `🛑 Hết quota API! Vui lòng nạp thêm quota, sau đó bấm "Tiếp tục dịch" để dịch tiếp Chương ${ch.num}.`, 'err');
+      } else if (err.message.includes('API key')) {
+        state.shouldStop = true;
+        state.wasStopped = true;
+      }
+      break;
+    }
+
+    updateProgress(state.chapters.filter(c => c.status === 'done').length, total);
+    renderChapterProgress();
+    await sleep(300);
+  }
+
+  const allTranslated = Object.values(state.translatedChapters).join('\n\n---\n\n');
+  state.finalResult = allTranslated;
+  showResult(allTranslated);
+  if (!state.shouldStop) appendLog(log, '🎉 Hoàn thành!', 'ok');
+}
+
+function renderChapterProgress() {
+  const list = document.getElementById('chapterProgressList');
+  const prevTop = list.scrollTop;
+  list.innerHTML = '';
+  let errorCount = 0;
+  state.chapters.forEach((ch, i) => {
+    const el = document.createElement('div');
+    el.className = 'chapter-item';
+    let statusHtml;
+    if (ch.status === 'done') {
+      statusHtml = '<span class="ch-status ch-done">✅</span>';
+    } else if (ch.status === 'doing') {
+      statusHtml = '<span class="ch-status ch-doing">⚡</span>';
+    } else if (ch.status === 'error') {
+      errorCount++;
+      statusHtml = `<span class="ch-status ch-err">❌</span><button class="btn-retry" title="Dịch lại chương này" onclick="retryChapter(${i})">🔄</button>`;
+    } else {
+      statusHtml = '<span class="ch-status ch-wait">○</span>';
+    }
+    el.innerHTML = `<span class="ch-num">Ch.${ch.num}</span><span class="ch-title">${ch.title.slice(0,30)}</span>${statusHtml}`;
+    list.appendChild(el);
+  });
+
+  jumpToDoing(list, prevTop);
+
+  // Cập nhật báo lỗi
+  const errDiv = document.getElementById('errorSummary');
+  if (errorCount > 0) {
+    document.getElementById('errorSummaryText').textContent = `⚠️ ${errorCount} chương dịch lỗi`;
+    errDiv.style.display = 'flex';
+  } else {
+    errDiv.style.display = 'none';
+  }
+}
+
+async function retryChapter(i) {
+  if (state.isRunning) { alert('Đang có tiến trình dịch, vui lòng chờ!'); return; }
+  const ch = state.chapters[i];
+  if (!ch) return;
+  const log = document.getElementById('translateLog');
+
+  state.isRunning = true;
+  ch.status = 'doing';
+  renderChapterProgress();
+  appendLog(log, `🔄 Dịch lại Chương ${ch.num}: ${ch.title.slice(0,20)}...`, 'info');
+
+  try {
+    let [translated, notes, scanned] = await translateContent(ch.content);
+    translated = applyNameMap(translated);
+    ch.status = 'done';
+    state.translatedChapters[i] = translated;
+    recordNotes('tr', `Chương ${ch.num}`, notes, scanned, log);
+
+    const fname = `Chương ${ch.num}.txt`;
+    downloadText(translated, fname);
+    appendLog(log, `💾 Xuất lại: ${fname}`, 'ok');
+  } catch(err) {
+    ch.status = 'error';
+    appendLog(log, `❌ Dịch lại Chương ${ch.num} thất bại: ${err.message}`, 'err');
+  }
+
+  state.isRunning = false;
+  renderChapterProgress();
+  const allTranslated = Object.values(state.translatedChapters).join('\n\n---\n\n');
+  state.finalResult = allTranslated;
+  showResult(allTranslated);
+}
+
+async function retryAllErrors() {
+  if (state.isRunning) { alert('Đang có tiến trình dịch, vui lòng chờ!'); return; }
+  const errorIdxs = state.chapters.map((ch, i) => ch.status === 'error' ? i : -1).filter(i => i >= 0);
+  if (errorIdxs.length === 0) { alert('Không có chương lỗi nào!'); return; }
+
+  const log = document.getElementById('translateLog');
+  state.isRunning = true;
+  state.shouldStop = false;
+  // Hide retry button while running
+  document.getElementById('btnTranslate').style.display = 'none';
+  document.getElementById('btnStop').style.display = 'inline-flex';
+  document.getElementById('btnContinue').style.display = 'none';
+
+  appendLog(log, `🔄 Dịch lại ${errorIdxs.length} chương lỗi...`, 'info');
+
+  for (const i of errorIdxs) {
+    if (state.shouldStop) { appendLog(log, '⏹ Đã dừng.', 'warn'); break; }
+    const ch = state.chapters[i];
+    ch.status = 'doing';
+    renderChapterProgress();
+    appendLog(log, `🔄 Dịch lại Chương ${ch.num}...`, 'info');
+    try {
+      let [translated, notes, scanned] = await translateContent(ch.content, () => state.shouldStop);
+      if (state.shouldStop) { ch.status = 'error'; break; }
+      translated = applyNameMap(translated);
+      ch.status = 'done';
+      state.translatedChapters[i] = translated;
+      recordNotes('tr', `Chương ${ch.num}`, notes, scanned, log);
+      const fname = `Chương ${ch.num}.txt`;
+      downloadText(translated, fname);
+      appendLog(log, `💾 Xuất lại: ${fname}`, 'ok');
+    } catch(err) {
+      ch.status = 'error';
+      appendLog(log, `❌ Chương ${ch.num} vẫn lỗi: ${err.message}`, 'err');
+      if (err.message.includes('quota') || err.message.includes('API key')) break;
+    }
+    renderChapterProgress();
+    await sleep(300);
+  }
+
+  state.isRunning = false;
+  document.getElementById('btnTranslate').style.display = 'inline-flex';
+  document.getElementById('btnStop').style.display = 'none';
+
+  renderChapterProgress();
+  const allTranslated = Object.values(state.translatedChapters).join('\n\n---\n\n');
+  state.finalResult = allTranslated;
+  showResult(allTranslated);
+
+  const remaining = state.chapters.filter(ch => ch.status === 'error').length;
+  appendLog(log, remaining > 0 ? `⚠️ Còn ${remaining} chương lỗi.` : '✅ Xong dịch lại các chương lỗi!', remaining > 0 ? 'warn' : 'ok');
+}
+
+
+// ============================================================
+// PROMPT 2 — QUÉT LẠI BẢN DỊCH TIẾNG VIỆT
+// ============================================================
+const DEFAULT_PROMPTS2 = {
+  cotrang: "VAI TRÒ\n\nBạn là biên tập viên chuyên nghiệp, chuyên hiệu đính truyện Tiên Hiệp,\nHuyền Huyễn, Tu Chân và Kiếm Hiệp cổ trang.\n\nNhiệm vụ của bạn là biên tập bản dịch tiếng Việt vừa được tạo ra, biến\nbản dịch máy thành văn bản truyện tự nhiên, mượt mà, đúng ngữ pháp và\ngiàu chất văn học.\n\nI. NGUYÊN TẮC ƯU TIÊN\n\n1.  Giữ chính xác nội dung nguyên tác.\n2.  Giữ đúng tên Hán Việt và thuật ngữ chuyên ngành.\n3.  Cải thiện văn phong tiếng Việt.\n4.  Giữ nguyên tính cách, cảm xúc và cách xưng hô của nhân vật.\n\nTuyệt đối không đánh đổi độ chính xác để lấy câu văn hoa mỹ.\n\nII. BIÊN TẬP VĂN PHONG\n\n1.  Viết lại những câu mang cấu trúc dịch máy thành câu tiếng Việt tự\n    nhiên.\n2.  Sắp xếp lại trật tự từ và cấu trúc câu khi cần thiết.\n3.  Sửa câu lủng củng, tối nghĩa, dài dòng, lặp từ hoặc thiếu chủ ngữ,\n    vị ngữ.\n4.  Loại bỏ cách diễn đạt cứng nhắc, dịch sát chữ và những từ nối bị lặp\n    máy móc.\n5.  Điều chỉnh cách ngắt câu, dấu câu và xuống dòng để dễ đọc.\n6.  Duy trì văn phong cổ trang Tiên Hiệp – Huyền Huyễn.\n7.  Giữ nguyên sắc thái lạnh lùng, uy nghiêm, hài hước, kiêu ngạo, sát\n    phạt hoặc cảm xúc của từng nhân vật.\n8.  Không biến lời thoại cổ trang thành lời nói hiện đại.\n9.  Không lạm dụng Hán Việt. Chỉ sử dụng những thuật ngữ thực sự phù hợp\n    với bối cảnh.\n10. Không tự ý rút gọn hoặc viết lại toàn bộ đoạn văn theo hướng làm mất\n    chi tiết.\n\nIII. QUÉT VÀ SỬA TÊN HÁN VIỆT\n\n1.  Kiểm tra tên nhân vật, địa danh, pháp bảo, công pháp, bí thuật, cảnh\n    giới và tông môn.\n2.  Đối chiếu với bảng thuật ngữ được cung cấp nếu có.\n3.  Nếu có nguyên văn tiếng Trung, dùng nguyên văn để xác minh âm Hán\n    Việt và ý nghĩa.\n4.  Phải phân biệt chữ Hán có âm gần giống nhau nhưng nghĩa khác nhau.\n5.  Không tự ý đổi tên riêng thành cách dịch nghĩa thông thường.\n6.  Không thay đổi một thuật ngữ đã được xác định chính xác chỉ vì muốn\n    câu văn nghe hay hơn.\n7.  Nếu chỉ có bản tiếng Việt mà không có nguyên văn tiếng Trung, không\n    được tự đoán tên Hán Việt mới. Giữ nguyên tên hiện có nếu chưa đủ\n    căn cứ để sửa.\n\nVí dụ:\n\n-   噬天鼎 = Phệ Thiên Đỉnh.\n-   吞天鼎 = Thôn Thiên Đỉnh.\n-   法则之灵 = Pháp Tắc Chi Linh.\n-   叶寒 = Diệp Hàn.\n\nIV. KIỂM TRA XƯNG HÔ\n\nQuét toàn bộ văn bản để phát hiện:\n\n-   Sư Huynh bị dịch thành anh trai.\n-   Sư tỷ, sư đệ, sư muội bị nhầm lẫn.\n-   Công tử bị nhầm thành tiểu thư hoặc ngược lại.\n-   Tiền bối, hậu bối, đạo hữu, trưởng lão, tông chủ dùng sai quan hệ.\n-   Ta, ngươi, hắn, nàng bị dùng không thống nhất.\n-   Nhân vật thay đổi giới tính hoặc vai vế do lỗi dịch máy.\n\nSửa theo quan hệ nhân vật và ngữ cảnh. Không tự ý thay đổi cách xưng hô\ncó chủ đích của tác giả.\n\nV. QUÉT LỖI NGÔN NGỮ\n\n-   Dịch các từ tiếng Trung, tiếng Anh còn sót lại khi có thể xác định\n    chính xác.\n-   Sửa lỗi Unicode, ký tự Cyrillic giả dạng chữ Latin, chữ lỗi OCR và\n    dấu câu sai.\n-   Sửa những từ bị dịch sai nghĩa dựa trên ngữ cảnh.\n-   Xử lý câu bị lặp hoặc nội dung bị trùng do lỗi sao chép.\n-   Không tự ý thay thế những thuật ngữ chuyên ngành đã chính xác.\n\nNếu còn từ hoặc tên riêng không thể xác định chắc chắn, không được tự\nbịa cách dịch. Liệt kê chúng trong phần ghi chú cuối văn bản để người\ndùng kiểm tra.\n\nVI. XÓA NỘI DUNG KHÔNG THUỘC TRUYỆN\n\nXóa những nội dung quảng cáo hoặc thông tin ngoài cốt truyện, bao gồm:\n\n-   Đường link, địa chỉ website và lời quảng cáo trang dịch.\n-   Lời kêu gọi bình chọn, cầu phiếu, cầu thưởng.\n-   Thông báo quảng cáo, giới thiệu nền tảng và nội dung tiếp thị.\n-   P/S, ghi chú của người đăng hoặc người dịch không liên quan đến\n    truyện.\n-   Những dòng giới thiệu hoặc thông báo ngoài nội dung chương.\n\nLưu ý: Không xóa lời thoại, lời dẫn, suy nghĩ nhân vật, thơ ca, câu\nchuyện được kể trong truyện hoặc những ghi chú thực sự thuộc nguyên tác.\n\nVII. BẢO TOÀN NỘI DUNG\n\n-   Không thêm tình tiết mới.\n-   Không bỏ sót tình tiết, lời thoại hoặc thông tin.\n-   Không thay đổi số liệu, tên gọi, cảnh giới, kết quả chiến đấu.\n-   Không tự giải thích những chỗ nguyên tác cố tình để bí ẩn.\n-   Không biến nội dung chưa rõ thành nội dung đã được khẳng định.\n-   Nếu có nguyên văn tiếng Trung, dùng nó để kiểm tra những chỗ nghi\n    ngờ dịch sai.\n-   Nếu không có nguyên văn, chỉ biên tập câu chữ và không tự ý sửa nội\n    dung theo suy đoán.\n\nVIII. KIỂM TRA CUỐI CÙNG\n\nTrước khi xuất kết quả, tự đọc lại toàn bộ văn bản như một độc giả:\n\n-   Có câu nào đọc lên vẫn thấy giống dịch máy không?\n-   Có đoạn nào lặp ý, lủng củng hoặc khó hiểu không?\n-   Có tên nhân vật nào bị đổi cách viết không?\n-   Có thuật ngữ tu tiên nào bị dịch sai không?\n-   Có đoạn nào bị mất nội dung trong quá trình biên tập không?\n-   Có lời thoại nào không đúng quan hệ nhân vật không?\n\nNếu phát hiện lỗi, tự sửa trước khi xuất.\n\nIX. ĐỊNH DẠNG ĐẦU RA\n\n-   Chỉ xuất bản truyện đã biên tập hoàn chỉnh.\n-   Giữ nguyên tiêu đề chương theo định dạng: Chương [số]: [Tên chương].\n-   Giữ nguyên thứ tự diễn biến.\n-   Không trình bày quá trình sửa lỗi.\n-   Không đánh giá chất lượng bản dịch.\n-   Chỉ tạo phần ghi chú riêng ở cuối khi thực sự còn từ hoặc tên không\n    thể xác định.\n-   Không thêm lời mở đầu hoặc lời kết.",
+  danquoc: 'Bạn là biên tập viên truyện ngôn tình Dân Quốc. Quét văn bản vừa dịch sang tiếng Việt:\n+ Dịch các từ tiếng Trung, tiếng Anh... còn sót (nếu không dịch được thì đưa ra bảng liệt kê).\n+ Sắp xếp lại văn phong phù hợp với phong cách, ngữ cảnh Dân Quốc.\n+ Sửa lỗi xưng hô cho phù hợp với Dân Quốc (vd: anh trai lại dịch thành sư huynh) hoặc xưng hô sai (vd: cha lại xưng thành mẹ...).\n+ Xóa bỏ các dòng không liên quan đến truyện (link, lời tác giả, cầu phiếu, p/s...).\nGiữ đúng tên nhân vật theo danh sách (nếu có).',
+  hiendai: 'Bạn là biên tập viên truyện ngôn tình hiện đại. Quét văn bản vừa dịch sang tiếng Việt:\n+ Dịch các từ tiếng Trung, tiếng Anh... còn sót (nếu không dịch được thì đưa ra bảng liệt kê).\n+ Sắp xếp lại văn phong phù hợp với phong cách, ngữ cảnh hiện đại.\n+ Sửa lỗi xưng hô cho phù hợp với hiện đại (vd: anh trai lại dịch thành sư huynh) hoặc xưng hô sai (vd: cha lại xưng thành mẹ...).\n+ Xóa bỏ các dòng không liên quan đến truyện (link, lời tác giả, cầu phiếu, p/s...).\nGiữ đúng tên nhân vật theo danh sách (nếu có).'
+};
+const SCAN_MARK = '===CHUA_DICH===';
+// Prompt Cổ Trang cũ — nếu trình duyệt còn lưu bản cũ thì tự đổi sang bản mới
+const LEGACY_COTRANG_P1 = 'Bạn là biên tập viên truyện tiên hiệp/huyền huyễn cổ trang. Quét văn bản vừa dịch sang tiếng Việt:\n+ Dịch các từ tiếng Trung, tiếng Anh... còn sót (nếu không dịch được thì đưa ra bảng liệt kê).\n+ Sắp xếp lại văn phong phù hợp với phong cách, ngữ cảnh cổ trang.\n+ Sửa lỗi xưng hô cho phù hợp với cổ trang (vd: Sư huynh lại dịch thành anh trai) hoặc xưng hô sai (vd: công tử lại xưng tiểu thư...).\n+ Xóa bỏ các dòng không liên quan đến truyện (link, lời tác giả, cầu phiếu, p/s...).\nGiữ đúng tên nhân vật theo danh sách (nếu có).';
+const LEGACY_COTRANG_P2 = 'Bạn là biên tập viên truyện tiên hiệp/huyền huyễn cổ trang. Quét văn bản vừa dịch sang tiếng Việt:\n+ Dịch các từ tiếng Trung, tiếng Anh... còn sót (nếu không dịch được thì đưa ra bảng liệt kê).\n+ Sắp xếp lại văn phong phù hợp với phong cách, ngữ cảnh cổ trang.\n+ Sửa lỗi xưng hô cho phù hợp với cổ trang (vd: Sư huynh lại dịch thành anh trai) hoặc xưng hô sai (vd: công tử lại xưng tiểu thư...).\n+ Xóa bỏ các dòng không liên quan đến truyện (link, lời tác giả, cầu phiếu, p/s...).\nGiữ đúng tên nhân vật theo danh sách (nếu có).';
+// Quy tắc định dạng — luôn gắn thêm sau prompt 2 để tách bản văn và bảng liệt kê
+const SCAN_FORMAT_RULES =
+  '\n\nQUY TẮC TRẢ VỀ (bắt buộc):\n' +
+  '1. Trả về TOÀN BỘ văn bản đã sửa, giữ nguyên dòng tiêu đề chương (nếu có), không tóm tắt, không thêm bớt tình tiết, không giải thích.\n' +
+  '2. Sau văn bản, viết một dòng duy nhất: ' + SCAN_MARK + '\n' +
+  '3. Dưới dòng đó liệt kê mỗi dòng một từ/cụm từ tiếng Trung, tiếng Anh... vẫn KHÔNG dịch được, theo dạng: từ gốc | ghi chú. Nếu không có thì ghi: Không có\n' +
+  '4. Mọi phần ghi chú (nếu có) CHỈ được đặt dưới dòng ' + SCAN_MARK + ', không viết ở chỗ khác.';
+
+function isScanEnabled() {
+  const el = document.getElementById('scan2Toggle');
+  return !!(el && el.checked);
+}
+
+// Tách kết quả prompt 2 → [văn bản đã sửa, [các dòng từ chưa dịch]]
+function parseScanResult(resp) {
+  resp = resp || '';
+  const m = /^[ \t]*=+\s*CH[UƯ]A[\s_]*D[IỊ]CH\s*=+[ \t]*$/im.exec(resp);
+  let body = resp, tail = '';
+  if (m) { body = resp.slice(0, m.index); tail = resp.slice(m.index + m[0].length); }
+  body = body.replace(/^\s*```[a-zA-Z]*\s*\n/, '').replace(/\n\s*```\s*$/, '');
+  body = body.replace(/\s+$/, '');
+  const items = [];
+  tail.split(/\r?\n/).forEach(line => {
+    let l = line.trim().replace(/^`+|`+$/g, '').trim();
+    l = l.replace(/^([-*+•]|[0-9]+[.)])\s*/, '').trim();
+    if (l.startsWith('|') && l.endsWith('|')) l = l.replace(/^\|+|\|+$/g, '').trim();
+    if (!l || /^[-|:=\s]+$/.test(l)) return;
+    if (/^(không có|khong co|none|n\/?a)\.?$/i.test(l)) return;
+    if (/^(từ gốc|tu goc)\s*\|/i.test(l)) return;
+    items.push(l);
+  });
+  return [body, items];
+}
+
+// Bước 2: quét bản dịch tiếng Việt bằng prompt 2 (kèm danh sách tên nhân vật)
+async function scanWithPrompt2(text) {
+  const sys2 = document.getElementById('systemPrompt2').value + SCAN_FORMAT_RULES;
+  const resp = await callWithRotation(buildTranslatePrompt(text), sys2);
+  const [body, items] = parseScanResult(resp);
+  return [body.trim() ? body : text, items];
+}
+
+// Dịch (prompt 1) từng chunk, rồi quét lại (prompt 2) nếu bật → [bản dịch, từ chưa dịch, đã_quét]
+async function translateContent(content, stopCheck) {
+  const chunkSize = parseInt(document.getElementById('chunkSize').value) || 2000;
+  const chunks = splitIntoChunks(content, chunkSize);
+  const scan = isScanEnabled();
+  let translated = '';
+  const notes = [];
+  for (let j = 0; j < chunks.length; j++) {
+    if (stopCheck && stopCheck()) break;
+    let part = await callWithRotation(buildTranslatePrompt(chunks[j]));
+    if (scan) {
+      if (stopCheck && stopCheck()) break;
+      const [fixed, items] = await scanWithPrompt2(part);
+      part = fixed;
+      notes.push(...items);
+    }
+    translated += part + '\n';
+    await sleep(200);
+  }
+  return [translated, notes, scan];
+}
+
+// ---------------- NOTE ----------------
+const notesStore = new Map();   // "loại::nhãn" -> { kind, label, items }
+
+function escapeHtmlNote(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function recordNotes(kind, label, items, scanned, log) {
+  const key = kind + '::' + label;
+  if (items && items.length) {
+    notesStore.set(key, { kind, label, items: [...new Set(items)] });
+  } else {
+    notesStore.delete(key);
+  }
+  renderNotes();
+  if (scanned && log) {
+    if (items && items.length) appendLog(log, `🔎 Đã quét Prompt 2 · ${label}: còn ${notesStore.get(key).items.length} từ chưa dịch → xem tab 📝 Note`, 'warn');
+    else appendLog(log, `🔎 Đã quét Prompt 2 · ${label}`, 'ok');
+  }
+}
+
+function clearNotes(kind) {
+  [...notesStore.keys()].forEach(k => { if (notesStore.get(k).kind === kind) notesStore.delete(k); });
+  renderNotes();
+}
+
+function renderNotes() {
+  const box = document.getElementById('noteBox');
+  if (!box) return;
+  let total = 0, html = '';
+  notesStore.forEach(n => {
+    total += n.items.length;
+    html += `<div class="note-head">■ ${escapeHtmlNote(n.label)} (${n.items.length})</div>`;
+    n.items.forEach(it => { html += `<div class="note-item">• ${escapeHtmlNote(it)}</div>`; });
+  });
+  box.innerHTML = html || '<div class="note-empty">Chưa có từ nào. Sau khi dịch, những từ Prompt 2 không dịch được sẽ hiện ở đây.</div>';
+  document.getElementById('noteCount').textContent = `${total} từ`;
+  document.getElementById('tabBtnNote').textContent = total ? `📝 Note (${total})` : '📝 Note';
+}
+
+function notePlainText() {
+  const lines = [];
+  notesStore.forEach(n => {
+    lines.push(`${n.label}:`);
+    n.items.forEach(it => lines.push(`  • ${it}`));
+    lines.push('');
+  });
+  return lines.join('\n').trim();
+}
+
+function copyTextQuick(text, msg) {
+  const fallback = () => {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch(e) {}
+    ta.remove();
+    alert(msg);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => alert(msg)).catch(fallback);
+  } else fallback();
+}
+
+function copyNotes() {
+  const text = notePlainText();
+  if (!text) { alert('Chưa có từ nào để sao chép!'); return; }
+  copyTextQuick(text, 'Đã sao chép!');
+}
+
+function copyNoteWords() {
+  const words = [];
+  notesStore.forEach(n => n.items.forEach(it => {
+    const w = it.split('|')[0].trim();
+    if (w && !words.includes(w)) words.push(w);
+  }));
+  if (!words.length) { alert('Chưa có từ nào để sao chép!'); return; }
+  copyTextQuick(words.join('\n'), `Đã sao chép ${words.length} từ gốc!`);
+}
+
+function clearAllNotes() {
+  if (notesStore.size === 0) return;
+  if (!confirm('Xóa toàn bộ danh sách Note?')) return;
+  notesStore.clear();
+  renderNotes();
+}
+
+// ---------------- PROMPT 2: SỬA / LƯU / RESET ----------------
+function setPrompt2Readonly(ro) {
+  const ta = document.getElementById('systemPrompt2');
+  if (ro) {
+    ta.setAttribute('readonly', true);
+    ta.style.background = 'var(--readonly-bg)';
+    ta.style.color = 'var(--ash)';
+    ta.style.cursor = 'default';
+  } else {
+    ta.removeAttribute('readonly');
+    ta.style.background = '';
+    ta.style.color = '';
+    ta.style.cursor = '';
+  }
+}
+
+function showPrompt2Status(text, color, hideAfter) {
+  const el = document.getElementById('prompt2SaveStatus');
+  if (!el) return;
+  el.style.display = 'block';
+  if (color) el.style.color = color;
+  el.textContent = text;
+  if (hideAfter) setTimeout(() => { el.style.display = 'none'; }, hideAfter);
+}
+
+function editPrompt2() {
+  setPrompt2Readonly(false);
+  document.getElementById('systemPrompt2').focus();
+  document.getElementById('btnEditPrompt2').style.display = 'none';
+  document.getElementById('btnSavePrompt2').style.display = 'inline-flex';
+  showPrompt2Status('✏️ Đang chỉnh sửa prompt 2...', 'var(--gold-dim)');
+}
+
+function savePrompt2() {
+  setPrompt2Readonly(true);
+  document.getElementById('btnEditPrompt2').style.display = 'inline-flex';
+  document.getElementById('btnSavePrompt2').style.display = 'none';
+  try { localStorage.setItem('tien_dich_system_prompt2', document.getElementById('systemPrompt2').value); } catch(e) {}
+  showPrompt2Status('✅ Đã lưu prompt 2', 'var(--jade)', 2500);
+}
+
+function resetPrompt2() {
+  if (!confirm('Khôi phục prompt 2 về mặc định cho phong cách hiện tại?')) return;
+  const preset = getActivePreset();
+  setPrompt2Readonly(true);
+  document.getElementById('btnEditPrompt2').style.display = 'inline-flex';
+  document.getElementById('btnSavePrompt2').style.display = 'none';
+  document.getElementById('systemPrompt2').value = DEFAULT_PROMPTS2[preset];
+  try { localStorage.removeItem('tien_dich_system_prompt2'); } catch(e) {}
+  showPrompt2Status('↺ Đã reset prompt 2 về mặc định', 'var(--red)', 2500);
+}
+
+function applyPreset2(preset) {
+  const ta = document.getElementById('systemPrompt2');
+  if (!ta || !DEFAULT_PROMPTS2[preset]) return;
+  ta.value = DEFAULT_PROMPTS2[preset];
+  try { localStorage.setItem('tien_dich_system_prompt2', ta.value); } catch(e) {}
+  showPrompt2Status('✅ Đã áp dụng & lưu prompt 2', 'var(--jade)', 2000);
+}
+
+// ---------------- PROMPT TRONG NÚT (MODAL) ----------------
+function openPromptModal(n) {
+  document.getElementById('promptModal' + n).classList.add('show');
+}
+function closePromptModal(n) {
+  document.getElementById('promptModal' + n).classList.remove('show');
+  updatePromptInfo();
+}
+function promptSummary(text) {
+  if (!text || !text.trim()) return '(trống)';
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  let first = lines.find(l => l.length > 20) || lines[0] || '';
+  if (first.length > 70) first = first.slice(0, 70) + '…';
+  return `${first}  ·  ${text.length.toLocaleString()} ký tự`;
+}
+function updatePromptInfo() {
+  const i1 = document.getElementById('prompt1Info'), i2 = document.getElementById('prompt2Info');
+  if (i1) i1.textContent = promptSummary(document.getElementById('systemPrompt').value);
+  if (i2) i2.textContent = promptSummary(document.getElementById('systemPrompt2').value);
+}
+
+// Nhập prompt 1 / prompt 2 từ file TXT
+async function importPromptTxt(e, n) {
+  const file = e.target.files[0];
+  e.target.value = '';
+  if (!file) return;
+  let content = '';
+  try { content = (await file.text()).replace(/^﻿/, '').trim(); } catch(err) { alert('Lỗi đọc file: ' + err.message); return; }
+  if (!content) { alert('File trống!'); return; }
+  if (n === 1) {
+    document.getElementById('systemPrompt').value = content;
+    try { localStorage.setItem('tien_dich_system_prompt', content); } catch(err) {}
+    const st = document.getElementById('promptSaveStatus');
+    if (st) { st.style.display = 'block'; st.style.color = 'var(--jade)'; st.textContent = `📂 Đã nhập & lưu prompt 1 từ file: ${file.name}`; setTimeout(() => { st.style.display = 'none'; }, 3000); }
+  } else {
+    document.getElementById('systemPrompt2').value = content;
+    try { localStorage.setItem('tien_dich_system_prompt2', content); } catch(err) {}
+    showPrompt2Status(`📂 Đã nhập & lưu prompt 2 từ file: ${file.name}`, 'var(--jade)', 3000);
+  }
+  updatePromptInfo();
+}
+
+// Nhập API key từ file TXT (mỗi dòng 1 key, hoặc cách nhau dấu phẩy; dòng bắt đầu # bị bỏ qua)
+async function importKeysTxt(e) {
+  const file = e.target.files[0];
+  e.target.value = '';
+  if (!file) return;
+  let content = '';
+  try { content = (await file.text()).replace(/^﻿/, ''); } catch(err) { alert('Lỗi đọc file: ' + err.message); return; }
+  let added = 0, dup = 0;
+  content.split(/\r?\n/).forEach(line => {
+    line = line.trim();
+    if (!line || line.startsWith('#')) return;
+    line.split(/[,;\s]+/).forEach(k => {
+      k = k.trim();
+      if (!k) return;
+      if (state.apiKeys.includes(k)) dup++;
+      else { addKey(k); added++; }
+    });
+  });
+  alert(`📂 Đã nhập ${added} API key mới` + (dup ? ` (bỏ qua ${dup} key trùng)` : '') + ` từ file ${file.name}.`);
+}
+
+// Tiến độ: cuộn tới mục ⚡ đang dịch (đặt giữa khung); không có thì giữ vị trí cuộn cũ
+function jumpToDoing(list, prevTop) {
+  const mark = list.querySelector('.ch-doing');
+  if (!mark) { list.scrollTop = prevTop; return; }
+  const item = mark.closest('.chapter-item');
+  item.classList.add('is-doing');
+  list.scrollTop = Math.max(0, item.offsetTop - list.clientHeight / 2 + item.clientHeight / 2);
+}
+
+function buildTranslatePrompt(text) {
+  let nameContext = '';
+  if (Object.keys(state.nameMap).length > 0) {
+    nameContext = '\nTên nhân vật:\n' +
+      Object.entries(state.nameMap).map(([cn, vi]) => `${cn}→${vi}`).join(' | ') + '\n';
+  }
+  return `${nameContext}${text}`;
+}
+
+function splitIntoChunks(text, size) {
+  const chunks = [];
+  let i = 0;
+  while (i < text.length) {
+    let end = Math.min(i + size, text.length);
+    // Try to break at paragraph
+    if (end < text.length) {
+      const nl = text.lastIndexOf('\n', end);
+      if (nl > i + size * 0.5) end = nl + 1;
+    }
+    chunks.push(text.slice(i, end));
+    i = end;
+  }
+  return chunks;
+}
+
+function applyNameMap(text) {
+  let result = text;
+  for (const [cn, vi] of Object.entries(state.nameMap)) {
+    if (cn && vi) {
+      result = result.split(cn).join(vi);
+    }
+  }
+  return result;
+}
+
+function updateProgress(done, total) {
+  const pct = total > 0 ? Math.round(done / total * 100) : 0;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressText').textContent = `${done} / ${total} ${state.mode === 'all' ? 'phần' : 'chương'}`;
+}
+
+function showResult(text) {
+  document.getElementById('resultBox').textContent = text.slice(0, 5000) + (text.length > 5000 ? '\n\n[... Xem file đã tải để xem đầy đủ ...]' : '');
+  document.getElementById('resultStats').textContent = `Tổng ký tự: ${text.length.toLocaleString()}`;
+  state.finalResult = text;
+}
+
+async function pickFolder() {
+  if (!('showDirectoryPicker' in window)) {
+    alert('Trình duyệt không hỗ trợ chọn thư mục.\nVui lòng dùng Chrome hoặc Edge.');
+    return;
+  }
+  try {
+    state.dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+    document.getElementById('outputFolderName').value = '📂 ' + state.dirHandle.name;
+    const st = document.getElementById('folderStatus');
+    st.textContent = '✅ Sẽ lưu vào: ' + state.dirHandle.name;
+    st.style.color = 'var(--jade)';
+    saveSettingsToStorage();
+  } catch(e) {
+    if (e.name !== 'AbortError') alert('Lỗi: ' + e.message);
+  }
+}
+
+async function downloadText(text, filename) {
+  if (state.dirHandle) {
+    try {
+      const fh = await state.dirHandle.getFileHandle(filename, { create: true });
+      const writable = await fh.createWritable();
+      await writable.write(text);
+      await writable.close();
+      return;
+    } catch(e) {
+      console.warn('Lưu thư mục lỗi, fallback:', e);
+    }
+  }
+  // Fallback: tải về Downloads
+  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function downloadResult() {
+  if (!state.finalResult) { alert('Chưa có kết quả!'); return; }
+  const ch1 = state.chapters[0]?.num || 1;
+  const chN = state.chapters[state.chapters.length-1]?.num || 1;
+  const defaultName = `Chương ${ch1}-${chN}.txt`;
+  const fname = state.mode === 'all' ? getCustomFilename(defaultName) : defaultName;
+  downloadText(state.finalResult, fname);
+}
+
+function copyResult() {
+  if (!state.finalResult) { alert('Chưa có kết quả!'); return; }
+  navigator.clipboard.writeText(state.finalResult).then(() => alert('Đã sao chép!'));
+}
+
+function appendLog(el, msg, type) {
+  const line = document.createElement('div');
+  line.className = `log-${type}`;
+  line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+  el.appendChild(line);
+  el.scrollTop = el.scrollHeight;
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// Ghi nhớ model mỗi khi thay đổi
+document.addEventListener('DOMContentLoaded', () => {
+  const modelSel = document.getElementById('modelSelect');
+  if (modelSel) modelSel.addEventListener('change', saveSettingsToStorage);
+});
+
+// ============================================================
+// FOLDER TRANSLATION
+// ============================================================
+const folderState = {
+  srcHandle: null,
+  outHandle: null,
+  files: [],        // [{name, chapterNum, handle, status:'wait'|'doing'|'done'|'error'}]
+  isRunning: false,
+  shouldStop: false,
+};
+
+async function pickSrcFolder() {
+  if (!('showDirectoryPicker' in window)) {
+    alert('Trình duyệt không hỗ trợ.\nVui lòng dùng Chrome hoặc Edge.'); return;
+  }
+  try {
+    folderState.srcHandle = await window.showDirectoryPicker({ mode: 'read' });
+    document.getElementById('srcFolderName').value = '📂 ' + folderState.srcHandle.name;
+    updateFolderPickStatus();
+    saveSettingsToStorage();
+    await scanFolderFiles();
+  } catch(e) { if (e.name !== 'AbortError') alert('Lỗi: ' + e.message); }
+}
+
+async function pickOutFolder() {
+  if (!('showDirectoryPicker' in window)) {
+    alert('Trình duyệt không hỗ trợ.\nVui lòng dùng Chrome hoặc Edge.'); return;
+  }
+  try {
+    folderState.outHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+    document.getElementById('outFolderName').value = '📂 ' + folderState.outHandle.name;
+    updateFolderPickStatus();
+    saveSettingsToStorage();
+  } catch(e) { if (e.name !== 'AbortError') alert('Lỗi: ' + e.message); }
+}
+
+function updateFolderPickStatus() {
+  const st = document.getElementById('folderPickStatus');
+  const src = folderState.srcHandle ? `✅ Nguồn: ${folderState.srcHandle.name}` : '❌ Chưa chọn folder nguồn';
+  const out = folderState.outHandle ? `✅ Xuất: ${folderState.outHandle.name}` : '❌ Chưa chọn folder xuất';
+  st.innerHTML = `<span style="color:${folderState.srcHandle?'var(--jade)':'var(--red)'}">${src}</span> &nbsp;|&nbsp; <span style="color:${folderState.outHandle?'var(--jade)':'var(--red)'}">${out}</span>`;
+}
+
+// Parse số chương từ tên file: 001.txt→1, 031.txt→31, 296.txt→296
+function parseChapterFromFilename(filename) {
+  const base = filename.replace(/\.txt$/i, '');
+  const n = parseInt(base, 10);
+  return isNaN(n) ? null : n;
+}
+
+async function scanFolderFiles() {
+  if (!folderState.srcHandle) return;
+  folderState.files = [];
+  for await (const [name, handle] of folderState.srcHandle.entries()) {
+    if (handle.kind === 'file' && name.toLowerCase().endsWith('.txt')) {
+      const chNum = parseChapterFromFilename(name);
+      if (chNum !== null) {
+        folderState.files.push({ name, chapterNum: chNum, handle, status: 'wait' });
+      }
+    }
+  }
+  // Sắp xếp theo số chương
+  folderState.files.sort((a, b) => a.chapterNum - b.chapterNum);
+  renderFolderFileList();
+  document.getElementById('folderFileListCard').style.display = folderState.files.length ? 'block' : 'none';
+  document.getElementById('folderFileCount').textContent = `${folderState.files.length} file`;
+}
+
+function renderFolderFileList() {
+  const list = document.getElementById('folderFileList');
+  list.innerHTML = '';
+  folderState.files.forEach(f => {
+    const el = document.createElement('div');
+    el.className = 'chapter-item';
+    el.innerHTML = `<span class="ch-num">Ch.${f.chapterNum}</span><span class="ch-title">${f.name}</span><span class="ch-status ch-wait" style="font-size:10px;color:var(--ash);">○ chờ</span>`;
+    list.appendChild(el);
+  });
+}
+
+function renderFolderProgress() {
+  const list = document.getElementById('folderProgressList');
+  const prevTop = list.scrollTop;
+  list.innerHTML = '';
+  let errCount = 0;
+  folderState.files.forEach((f, i) => {
+    const el = document.createElement('div');
+    el.className = 'chapter-item';
+    let statusHtml;
+    if (f.status === 'done') {
+      statusHtml = '<span class="ch-status ch-done">✅</span>';
+    } else if (f.status === 'doing') {
+      statusHtml = '<span class="ch-status ch-doing">⚡</span>';
+    } else if (f.status === 'error') {
+      errCount++;
+      statusHtml = `<span class="ch-status ch-err">❌</span><button class="btn-retry" title="Dịch lại" onclick="retrySingleFolderFile(${i})">🔄</button>`;
+    } else {
+      statusHtml = '<span class="ch-status ch-wait">○</span>';
+    }
+    el.innerHTML = `<span class="ch-num">Ch.${f.chapterNum}</span><span class="ch-title">${f.name}</span>${statusHtml}`;
+    list.appendChild(el);
+  });
+  jumpToDoing(list, prevTop);
+  // Cập nhật error summary
+  const errDiv = document.getElementById('folderErrorSummary');
+  if (errCount > 0) {
+    document.getElementById('folderErrorText').textContent = `⚠️ ${errCount} file dịch lỗi`;
+    errDiv.style.display = 'block';
+  } else {
+    errDiv.style.display = 'none';
+  }
+}
+
+function updateFolderProgress(done, total) {
+  const pct = total > 0 ? Math.round(done / total * 100) : 0;
+  document.getElementById('folderProgressBar').style.width = pct + '%';
+  document.getElementById('folderProgressText').textContent = `${done} / ${total} file`;
+}
+
+async function translateFolderFile(fileEntry) {
+  const file = await fileEntry.handle.getFile();
+  const text = await file.text();
+  const [translated, notes, scanned] = await translateContent(text);
+  recordNotes('fd', `${fileEntry.name} → Chương ${fileEntry.chapterNum}`, notes, scanned, document.getElementById('folderLog'));
+  return applyNameMap(translated);
+}
+
+async function saveFolderOutput(chapterNum, text) {
+  const fname = `Chương ${chapterNum}.txt`;
+  if (folderState.outHandle) {
+    try {
+      const fh = await folderState.outHandle.getFileHandle(fname, { create: true });
+      const writable = await fh.createWritable();
+      await writable.write(text);
+      await writable.close();
+      return fname;
+    } catch(e) { console.warn('Lỗi ghi folder:', e); }
+  }
+  // Fallback download
+  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = fname; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  return fname;
+}
+
+async function startFolderTranslation() {
+  if (!folderState.srcHandle) { alert('Chưa chọn folder nguồn!'); return; }
+  if (!folderState.outHandle) { alert('Chưa chọn folder xuất!'); return; }
+  if (state.apiKeys.length === 0) { alert('Chưa nhập API key!'); return; }
+  if (folderState.files.length === 0) { alert('Không tìm thấy file TXT trong folder nguồn!'); return; }
+
+  folderState.isRunning = true;
+  folderState.shouldStop = false;
+  clearNotes('fd');
+  folderState.files.forEach(f => f.status = 'wait');
+
+  document.getElementById('btnFolderTranslate').style.display = 'none';
+  document.getElementById('btnFolderStop').style.display = 'inline-flex';
+  document.getElementById('folderProgressSection').style.display = 'block';
+  document.getElementById('folderProgressCard').style.display = 'block';
+
+  const log = document.getElementById('folderLog');
+  log.innerHTML = '';
+  const total = folderState.files.length;
+  updateFolderProgress(0, total);
+  renderFolderProgress();
+  appendLog(log, `📁 Bắt đầu dịch ${total} file từ folder...`, 'info');
+
+  for (let i = 0; i < folderState.files.length; i++) {
+    if (folderState.shouldStop) { appendLog(log, '⏹ Đã dừng.', 'warn'); break; }
+    const f = folderState.files[i];
+    f.status = 'doing';
+    renderFolderProgress();
+    document.getElementById('folderCurrentInfo').textContent = `Đang dịch: ${f.name} → Chương ${f.chapterNum}.txt`;
+    appendLog(log, `⚡ Dịch ${f.name} (Ch.${f.chapterNum})...`, 'info');
+
+    try {
+      const translated = await translateFolderFile(f);
+      const fname = await saveFolderOutput(f.chapterNum, translated);
+      f.status = 'done';
+      appendLog(log, `💾 Xong: ${fname}`, 'ok');
+    } catch(err) {
+      f.status = 'error';
+      appendLog(log, `❌ Lỗi ${f.name}: ${err.message}`, 'err');
+      if (err.message.includes('quota') || err.message.includes('API key')) break;
+    }
+
+    updateFolderProgress(i + 1, total);
+    renderFolderProgress();
+
+    // Delay giữa các file (không delay sau file cuối)
+    if (i < folderState.files.length - 1 && !folderState.shouldStop) {
+      const delaySec = parseInt(document.getElementById('folderDelay').value) || 10;
+      for (let t = delaySec; t > 0; t--) {
+        if (folderState.shouldStop) break;
+        document.getElementById('folderCurrentInfo').textContent = `⏱ Nghỉ ${t}s trước file tiếp theo...`;
+        await sleep(1000);
+      }
+    }
+  }
+
+  folderState.isRunning = false;
+  document.getElementById('btnFolderTranslate').style.display = 'inline-flex';
+  document.getElementById('btnFolderStop').style.display = 'none';
+  document.getElementById('folderCurrentInfo').textContent = '—';
+  renderFolderProgress();
+  appendLog(log, '🎉 Hoàn thành dịch folder!', 'ok');
+}
+
+function stopFolderTranslation() {
+  folderState.shouldStop = true;
+  appendLog(document.getElementById('folderLog'), '⏹ Đang dừng...', 'warn');
+}
+
+async function retrySingleFolderFile(i) {
+  if (folderState.isRunning) { alert('Đang có tiến trình, vui lòng chờ!'); return; }
+  const f = folderState.files[i];
+  if (!f) return;
+  const log = document.getElementById('folderLog');
+  folderState.isRunning = true;
+  f.status = 'doing';
+  renderFolderProgress();
+  appendLog(log, `🔄 Dịch lại ${f.name}...`, 'info');
+  try {
+    const translated = await translateFolderFile(f);
+    const fname = await saveFolderOutput(f.chapterNum, translated);
+    f.status = 'done';
+    appendLog(log, `💾 Xong: ${fname}`, 'ok');
+  } catch(err) {
+    f.status = 'error';
+    appendLog(log, `❌ Vẫn lỗi: ${err.message}`, 'err');
+  }
+  folderState.isRunning = false;
+  renderFolderProgress();
+}
+
+async function retryAllFolderErrors() {
+  if (folderState.isRunning) { alert('Đang có tiến trình, vui lòng chờ!'); return; }
+  const errIdxs = folderState.files.map((f, i) => f.status === 'error' ? i : -1).filter(i => i >= 0);
+  if (errIdxs.length === 0) return;
+  const log = document.getElementById('folderLog');
+  folderState.isRunning = true;
+  appendLog(log, `🔄 Dịch lại ${errIdxs.length} file lỗi...`, 'info');
+  for (const i of errIdxs) {
+    if (folderState.shouldStop) break;
+    const f = folderState.files[i];
+    f.status = 'doing';
+    renderFolderProgress();
+    try {
+      const translated = await translateFolderFile(f);
+      const fname = await saveFolderOutput(f.chapterNum, translated);
+      f.status = 'done';
+      appendLog(log, `💾 Xong: ${fname}`, 'ok');
+    } catch(err) {
+      f.status = 'error';
+      appendLog(log, `❌ Vẫn lỗi ${f.name}: ${err.message}`, 'err');
+      if (err.message.includes('quota') || err.message.includes('API key')) break;
+    }
+    renderFolderProgress();
+    await sleep(300);
+  }
+  folderState.isRunning = false;
+  renderFolderProgress();
+  appendLog(log, '✅ Xong dịch lại!', 'ok');
+}
+
+// ============================================================
+// NAME SYNC
+// ============================================================
+function openNameSync() {
+  document.getElementById('nameSyncModal').classList.add('show');
+  if (Object.keys(state.nameMap).length === 0) {
+    document.getElementById('nameTableBody').innerHTML = '';
+    addNameRow();
+  } else {
+    renderNameTable();
+  }
+}
+
+function closeNameSync() {
+  document.getElementById('nameSyncModal').classList.remove('show');
+}
+
+function addNameRow(cn = '', vi = '') {
+  const tbody = document.getElementById('nameTableBody');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><input type="text" placeholder="韩立" value="${cn}" class="name-cn" /></td>
+    <td><input type="text" placeholder="Hàn Lập" value="${vi}" class="name-vi" /></td>
+    <td><button class="btn btn-danger" style="padding:4px 8px; font-size:12px;" onclick="this.closest('tr').remove()">✕</button></td>
+  `;
+  tbody.appendChild(tr);
+}
+
+function renderNameTable() {
+  const tbody = document.getElementById('nameTableBody');
+  tbody.innerHTML = '';
+  for (const [cn, vi] of Object.entries(state.nameMap)) {
+    addNameRow(cn, vi);
+  }
+}
+
+function clearNames() {
+  if (!confirm('Xóa tất cả tên nhân vật đã lưu?')) return;
+  state.nameMap = {};
+  document.getElementById('nameTableBody').innerHTML = '';
+  addNameRow();
+  document.getElementById('nameSyncInfo').textContent = 'Chưa có tên nào được đồng bộ';
+  try { localStorage.removeItem('tien_dich_names'); } catch(e) {}
+}
+
+function saveNames() {
+  state.nameMap = {};
+  document.querySelectorAll('#nameTableBody tr').forEach(tr => {
+    const cn = tr.querySelector('.name-cn')?.value.trim();
+    const vi = tr.querySelector('.name-vi')?.value.trim();
+    if (cn && vi) state.nameMap[cn] = vi;
+  });
+  const count = Object.keys(state.nameMap).length;
+  document.getElementById('nameSyncInfo').textContent = count > 0
+    ? `✅ Đã đồng bộ ${count} tên nhân vật` : 'Chưa có tên nào được đồng bộ';
+  try { localStorage.setItem('tien_dich_names', JSON.stringify(state.nameMap)); } catch(e) {}
+  closeNameSync();
+}
+
+// Tải xuống danh sách tên nhân vật dạng TXT (TênGốc|TênViệt) — lấy từ bảng đang hiển thị
+function downloadNamesTxt() {
+  const rows = [];
+  const seen = new Set();
+  document.querySelectorAll('#nameTableBody tr').forEach(tr => {
+    const cn = tr.querySelector('.name-cn')?.value.trim();
+    const vi = tr.querySelector('.name-vi')?.value.trim();
+    if (cn && vi && !seen.has(cn)) { seen.add(cn); rows.push(`${cn}|${vi}`); }
+  });
+  if (rows.length === 0) {
+    for (const [cn, vi] of Object.entries(state.nameMap)) if (cn && vi) rows.push(`${cn}|${vi}`);
+  }
+  if (rows.length === 0) { alert('Chưa có tên nhân vật nào để tải xuống!'); return; }
+  const blob = new Blob([rows.join('\n')], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'Tên nhân vật.txt';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function loadNamesFromStorage() {
+  try {
+    const saved = localStorage.getItem('tien_dich_names');
+    if (saved) {
+      state.nameMap = JSON.parse(saved);
+      const count = Object.keys(state.nameMap).length;
+      if (count > 0) {
+        document.getElementById('nameSyncInfo').textContent = `✅ Đã đồng bộ ${count} tên nhân vật`;
+      }
+    }
+  } catch(e) {}
+}
+
+function updateExtractLabel() {
+  const mode = document.querySelector('input[name="extractMode"]:checked')?.value || 'basic';
+  const desc = document.getElementById('extractModeDesc');
+  if (!desc) return;
+  if (mode === 'basic') {
+    desc.textContent = '⚡ Trích xuất nhanh từ 3.000 ký tự đầu.';
+  } else {
+    const fullLen = document.getElementById('sourceText').value.trim().length;
+    desc.textContent = `🔬 Quét toàn bộ văn bản (${fullLen.toLocaleString()} ký tự) — có thể mất nhiều thời gian hơn.`;
+  }
+}
+
+async function autoExtractNames() {
+  const fullText = document.getElementById('sourceText').value.trim();
+  if (!fullText) { alert('Chưa có văn bản!'); return; }
+  if (state.apiKeys.length === 0) { alert('Chưa có API key!'); return; }
+
+  const mode = document.querySelector('input[name="extractMode"]:checked')?.value || 'basic';
+  const btn = document.getElementById('btnAutoExtract');
+  btn.innerHTML = '<span class="spinning">⚙️</span> Đang trích xuất...';
+  btn.disabled = true;
+
+  try {
+    let allNames = {};
+
+    if (mode === 'basic') {
+      // Chế độ cơ bản: chỉ lấy 3000 ký tự đầu
+      const text = fullText.slice(0, 3000);
+      const prompt = `Từ đoạn văn tiếng Trung sau, hãy trích xuất danh sách tên nhân vật chính. 
+Trả về dạng JSON: [{"cn":"tên_trung","vi":"phiên_âm_việt"}]
+Chỉ trả về JSON, không giải thích.
+
+Văn bản: ${text}`;
+      const result = await callWithRotation(prompt);
+      const clean = result.replace(/```json|```/g, '').trim();
+      const names = JSON.parse(clean);
+      names.forEach(n => { if (n.cn && n.vi) allNames[n.cn] = n.vi; });
+
+    } else {
+      // Chế độ chính xác: quét toàn bộ văn bản theo từng chunk 4000 ký tự
+      const CHUNK = 4000;
+      const totalChunks = Math.ceil(fullText.length / CHUNK);
+      const desc = document.getElementById('extractModeDesc');
+
+      for (let i = 0; i < totalChunks; i++) {
+        const chunk = fullText.slice(i * CHUNK, (i + 1) * CHUNK);
+        if (desc) desc.textContent = `🔬 Đang quét chunk ${i+1}/${totalChunks}...`;
+        const prompt = `Từ đoạn văn tiếng Trung sau, trích xuất TẤT CẢ tên nhân vật (tên người, bí danh, hiệu). 
+Trả về dạng JSON: [{"cn":"tên_trung","vi":"phiên_âm_việt"}]
+Chỉ trả về JSON, không giải thích.
+
+Văn bản: ${chunk}`;
+        try {
+          const result = await callWithRotation(prompt);
+          const clean = result.replace(/```json|```/g, '').trim();
+          const names = JSON.parse(clean);
+          names.forEach(n => {
+            if (n.cn && n.vi && !allNames[n.cn]) allNames[n.cn] = n.vi;
+          });
+        } catch(e) { /* bỏ qua chunk lỗi, tiếp tục */ }
+        // nhỏ delay tránh rate limit
+        if (i < totalChunks - 1) await sleep(300);
+      }
+      if (desc) desc.textContent = `✅ Đã quét xong ${totalChunks} chunk — tìm thấy ${Object.keys(allNames).length} tên.`;
+    }
+
+    // Gộp vào state.nameMap (ưu tiên giữ tên cũ nếu đã có)
+    for (const [cn, vi] of Object.entries(allNames)) {
+      if (!state.nameMap[cn]) state.nameMap[cn] = vi;
+    }
+    renderNameTable();
+    if (Object.keys(state.nameMap).length === 0) addNameRow();
+
+  } catch(err) {
+    alert('Lỗi trích xuất: ' + err.message);
+    addNameRow();
+  }
+
+  btn.innerHTML = '🔍 Bắt đầu trích xuất';
+  btn.disabled = false;
+}
+
+// ============================================================
+// NHẬP FILE TXT TÊN NHÂN VẬT  (định dạng: TênGốc|TênViệt)
+// ============================================================
+function handleNameTxtDrag(e) {
+  e.preventDefault();
+  document.getElementById('nameTxtDrop').classList.add('drag');
+}
+function handleNameTxtDragLeave(e) {
+  document.getElementById('nameTxtDrop').classList.remove('drag');
+}
+function handleNameTxtDrop(e) {
+  e.preventDefault();
+  document.getElementById('nameTxtDrop').classList.remove('drag');
+  const file = e.dataTransfer?.files?.[0];
+  if (file) processNameTxtFile(file);
+}
+function importNameTxt(e) {
+  const file = e.target.files?.[0];
+  if (file) processNameTxtFile(file);
+  e.target.value = '';
+}
+function processNameTxtFile(file) {
+  if (!file.name.endsWith('.txt')) { alert('Chỉ hỗ trợ file .txt!'); return; }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const lines = e.target.result.split(/\r?\n/);
+    let added = 0, skipped = 0;
+    lines.forEach(line => {
+      line = line.trim();
+      if (!line || line.startsWith('#')) return; // bỏ dòng trống và comment
+      const parts = line.split('|');
+      if (parts.length >= 2) {
+        const cn = parts[0].trim();
+        const vi = parts[1].trim();
+        if (cn && vi) { state.nameMap[cn] = vi; added++; }
+        else skipped++;
+      } else { skipped++; }
+    });
+    renderNameTable();
+    if (Object.keys(state.nameMap).length === 0) addNameRow();
+    const statusEl = document.getElementById('nameTxtStatus');
+    if (statusEl) {
+      statusEl.style.display = 'block';
+      statusEl.style.color = added > 0 ? 'var(--jade)' : 'var(--red)';
+      statusEl.textContent = `✅ Đã nhập ${added} tên` + (skipped > 0 ? ` (bỏ qua ${skipped} dòng không hợp lệ)` : '');
+    }
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+
+function applyStylePreset(preset) {
+  var presets = {
+    cotrang: "VAI TRÒ\n\nBạn là người dịch truyện chuyên nghiệp, chuyên dịch tiểu thuyết Trung\nQuốc sang tiếng Việt thuộc các thể loại Tiên Hiệp, Huyền Huyễn, Tu Chân\nvà Kiếm Hiệp.\n\nNhiệm vụ của bạn là dịch toàn bộ nguyên văn tiếng Trung sang tiếng Việt\nchính xác, tự nhiên, mạch lạc, đúng văn phong cổ trang. Bản dịch phải\ngiữ nguyên nội dung, sắc thái và phong cách của nguyên tác.\n\nI. NGUYÊN TẮC ƯU TIÊN\n\n1.  Ưu tiên dịch đúng nghĩa và đầy đủ nội dung nguyên tác.\n2.  Tên riêng và thuật ngữ phải dùng âm Hán Việt chính xác, thống nhất.\n3.  Văn phong tiếng Việt phải tự nhiên, trôi chảy, dễ hiểu.\n4.  Giữ đúng bối cảnh, quan hệ nhân vật, cảm xúc và sắc thái câu văn.\n5.  Không tự ý thêm, bớt, suy diễn hoặc thay đổi nội dung.\n\nII. QUY TẮC DỊCH TÊN VÀ THUẬT NGỮ\n\n1.  Tên nhân vật, địa danh, tông môn, công pháp, pháp bảo, bí thuật,\n    cảnh giới và chức danh phải được chuyển sang âm Hán Việt phù hợp với\n    chữ Hán gốc.\n2.  Không dịch nghĩa tùy tiện tên riêng hoặc pháp bảo nếu nguyên tác\n    dùng tên gọi riêng.\n3.  Phải phân biệt những chữ Hán có âm hoặc nghĩa gần giống nhau. Không\n    được tự ý thay chữ hoặc đổi thuật ngữ.\n4.  Nếu người dùng cung cấp bảng tên và thuật ngữ, phải ưu tiên tuyệt\n    đối bảng đó và giữ thống nhất từ đầu đến cuối.\n5.  Một tên hoặc thuật ngữ đã xác định phải được dùng nhất quán trong\n    toàn bộ văn bản.\n6.  Không tự ý Việt hóa tên riêng theo cách hiện đại hoặc thay bằng từ\n    ngữ thông thường.\n7.  Nếu gặp tên riêng chưa rõ, căn cứ vào chữ Hán gốc để chuyển âm Hán\n    Việt; không đoán theo bản dịch máy.\n\nVí dụ cần phân biệt: - 噬天鼎 = Phệ Thiên Đỉnh. - 吞天鼎 = Thôn Thiên\nĐỉnh. - 法则之灵 = Pháp Tắc Chi Linh. - 叶寒 = Diệp Hàn.\n\nIII. VĂN PHONG VÀ XƯNG HÔ\n\n1.  Sử dụng văn phong cổ trang phù hợp với truyện Tiên Hiệp – Huyền\n    Huyễn.\n2.  Dùng cách xưng hô phù hợp như: ta, ngươi, hắn, nàng, đạo hữu, tiền\n    bối, hậu bối, sư huynh, sư tỷ, sư đệ, sư muội, trưởng lão, tông chủ…\n3.  Căn cứ vào quan hệ, địa vị, tuổi tác và tình huống để lựa chọn cách\n    xưng hô.\n4.  Không dịch nhầm sư huynh thành anh trai, sư tỷ thành chị gái hoặc\n    các danh xưng môn phái thành quan hệ gia đình.\n5.  Phân biệt đúng giới tính, vai vế và thân phận của nhân vật.\n6.  Không biến lời thoại cổ trang thành lời nói hiện đại, suồng sã.\n7.  Giữ nguyên sắc thái lời thoại: lạnh lùng, uy nghiêm, hài hước, kiêu\n    ngạo, phẫn nộ, sát phạt hoặc thân mật.\n\nIV. QUY TẮC DỊCH NỘI DUNG\n\n-   Dịch đầy đủ tất cả tiêu đề, lời dẫn, lời thoại, suy nghĩ, miêu tả,\n    thơ ca và nội dung thuộc nguyên tác.\n-   Không bỏ qua câu khó dịch hoặc đoạn lặp nếu đó là nội dung của tác\n    giả.\n-   Không tự rút gọn câu văn hoặc tóm tắt nội dung.\n-   Không thêm lời giải thích, bình luận hay tình tiết không có trong\n    nguyên tác.\n-   Giữ nguyên số liệu, thời gian, tên gọi, cấp bậc, cảnh giới, thứ tự\n    sự kiện và kết quả chiến đấu.\n-   Giữ đúng ngôi kể và góc nhìn của nguyên tác.\n-   Có thể điều chỉnh trật tự câu để tiếng Việt tự nhiên hơn, nhưng\n    không được làm thay đổi ý nghĩa.\n\nV. XỬ LÝ LỖI VÀ NỘI DUNG NGOÀI TRUYỆN\n\n1.  Dịch toàn bộ nội dung tiếng Trung sang tiếng Việt; không để sót chữ\n    Hán trong phần truyện, trừ trường hợp người dùng yêu cầu giữ nguyên.\n2.  Không để sót từ tiếng Anh hoặc ngôn ngữ khác nếu chúng có thể dịch\n    chính xác và thuộc nội dung cần dịch.\n3.  Sửa lỗi dấu câu và xuống dòng do định dạng nguồn gây ra, nhưng không\n    làm thay đổi nội dung.\n4.  Không tự ý xóa lời tác giả hoặc ghi chú nếu chưa xác định đó là nội\n    dung ngoài truyện.\n5.  Nếu có quảng cáo, đường link hoặc nội dung giới thiệu nền tảng rõ\n    ràng không thuộc truyện, có thể loại bỏ khi người dùng yêu cầu làm\n    sạch văn bản.\n\nVI. ĐỊNH DẠNG ĐẦU RA\n\n-   Giữ tiêu đề chương theo định dạng: Chương [số]: [Tên chương].\n-   Giữ thứ tự các đoạn và diễn biến của nguyên tác.\n-   Xuống dòng hợp lý giữa lời kể và lời thoại.\n-   Chỉ trả về bản dịch tiếng Việt hoàn chỉnh.\n-   Không thêm lời mở đầu, nhận xét, đánh giá hoặc giải thích quá trình\n    dịch.",
+    danquoc: 'Dịch truyện ngôn tình Dân Quốc (1910-1949) Trung → Việt.\n- Xưng hô đúng ngữ cảnh: tôi/anh/em/thiếp/ngài/thưa ông...\n- Văn phong lịch sự, trang trọng có tình cảm\n- Tên riêng phiên âm Hán Việt\nChỉ trả về bản dịch.',
+    hiendai: 'Bạn là người đọc và dịch truyện ngôn tình hiện đại Trung → Việt chuyên nghiệp, yêu cầu:\n- Xưng hô phải đúng ngữ cảnh và nhất quán xuyên suốt.\n- Văn phong tự nhiên, trôi chảy, giống truyện hiện đại.\n- Không dịch máy, không thêm bớt\n- Giữ nguyên tên riêng, đồng bộ tên nhân vật từ đầu đến cuối.\nChỉ trả về bản dịch.'
+  };
+  var ta = document.getElementById('systemPrompt');
+  if (ta && presets[preset]) {
+    // Nếu đang readonly thì cần mở khóa tạm để set giá trị
+    var wasReadonly = ta.hasAttribute('readonly');
+    ta.removeAttribute('readonly');
+    ta.value = presets[preset];
+    if (wasReadonly) {
+      ta.setAttribute('readonly', true);
+      ta.style.background = 'var(--readonly-bg)';
+      ta.style.color = 'var(--ash)';
+      ta.style.cursor = 'default';
+    }
+    // Lưu ngay vào localStorage khi chọn preset
+    try { localStorage.setItem('tien_dich_system_prompt', ta.value); } catch(e) {}
+    var statusEl = document.getElementById('promptSaveStatus');
+    if (statusEl) { statusEl.style.display = 'block'; statusEl.textContent = '✅ Đã áp dụng & lưu preset'; setTimeout(() => { statusEl.style.display = 'none'; }, 2000); }
+  }
+  applyPreset2(preset);
+  updatePromptInfo();
+  document.querySelectorAll('.style-preset-btn').forEach(function(b){ b.classList.remove('active'); });
+  var m = {cotrang:'presetCotrang',danquoc:'presetDanquoc',hiendai:'presetHiendai'};
+  var btn = document.getElementById(m[preset]);
+  if (btn) btn.classList.add('active');
+}
+
+// ============================================================
+// PROMPT EDIT / SAVE / RESET
+// ============================================================
+const DEFAULT_PROMPTS = {
+  cotrang: "VAI TRÒ\n\nBạn là người dịch truyện chuyên nghiệp, chuyên dịch tiểu thuyết Trung\nQuốc sang tiếng Việt thuộc các thể loại Tiên Hiệp, Huyền Huyễn, Tu Chân\nvà Kiếm Hiệp.\n\nNhiệm vụ của bạn là dịch toàn bộ nguyên văn tiếng Trung sang tiếng Việt\nchính xác, tự nhiên, mạch lạc, đúng văn phong cổ trang. Bản dịch phải\ngiữ nguyên nội dung, sắc thái và phong cách của nguyên tác.\n\nI. NGUYÊN TẮC ƯU TIÊN\n\n1.  Ưu tiên dịch đúng nghĩa và đầy đủ nội dung nguyên tác.\n2.  Tên riêng và thuật ngữ phải dùng âm Hán Việt chính xác, thống nhất.\n3.  Văn phong tiếng Việt phải tự nhiên, trôi chảy, dễ hiểu.\n4.  Giữ đúng bối cảnh, quan hệ nhân vật, cảm xúc và sắc thái câu văn.\n5.  Không tự ý thêm, bớt, suy diễn hoặc thay đổi nội dung.\n\nII. QUY TẮC DỊCH TÊN VÀ THUẬT NGỮ\n\n1.  Tên nhân vật, địa danh, tông môn, công pháp, pháp bảo, bí thuật,\n    cảnh giới và chức danh phải được chuyển sang âm Hán Việt phù hợp với\n    chữ Hán gốc.\n2.  Không dịch nghĩa tùy tiện tên riêng hoặc pháp bảo nếu nguyên tác\n    dùng tên gọi riêng.\n3.  Phải phân biệt những chữ Hán có âm hoặc nghĩa gần giống nhau. Không\n    được tự ý thay chữ hoặc đổi thuật ngữ.\n4.  Nếu người dùng cung cấp bảng tên và thuật ngữ, phải ưu tiên tuyệt\n    đối bảng đó và giữ thống nhất từ đầu đến cuối.\n5.  Một tên hoặc thuật ngữ đã xác định phải được dùng nhất quán trong\n    toàn bộ văn bản.\n6.  Không tự ý Việt hóa tên riêng theo cách hiện đại hoặc thay bằng từ\n    ngữ thông thường.\n7.  Nếu gặp tên riêng chưa rõ, căn cứ vào chữ Hán gốc để chuyển âm Hán\n    Việt; không đoán theo bản dịch máy.\n\nVí dụ cần phân biệt: - 噬天鼎 = Phệ Thiên Đỉnh. - 吞天鼎 = Thôn Thiên\nĐỉnh. - 法则之灵 = Pháp Tắc Chi Linh. - 叶寒 = Diệp Hàn.\n\nIII. VĂN PHONG VÀ XƯNG HÔ\n\n1.  Sử dụng văn phong cổ trang phù hợp với truyện Tiên Hiệp – Huyền\n    Huyễn.\n2.  Dùng cách xưng hô phù hợp như: ta, ngươi, hắn, nàng, đạo hữu, tiền\n    bối, hậu bối, sư huynh, sư tỷ, sư đệ, sư muội, trưởng lão, tông chủ…\n3.  Căn cứ vào quan hệ, địa vị, tuổi tác và tình huống để lựa chọn cách\n    xưng hô.\n4.  Không dịch nhầm sư huynh thành anh trai, sư tỷ thành chị gái hoặc\n    các danh xưng môn phái thành quan hệ gia đình.\n5.  Phân biệt đúng giới tính, vai vế và thân phận của nhân vật.\n6.  Không biến lời thoại cổ trang thành lời nói hiện đại, suồng sã.\n7.  Giữ nguyên sắc thái lời thoại: lạnh lùng, uy nghiêm, hài hước, kiêu\n    ngạo, phẫn nộ, sát phạt hoặc thân mật.\n\nIV. QUY TẮC DỊCH NỘI DUNG\n\n-   Dịch đầy đủ tất cả tiêu đề, lời dẫn, lời thoại, suy nghĩ, miêu tả,\n    thơ ca và nội dung thuộc nguyên tác.\n-   Không bỏ qua câu khó dịch hoặc đoạn lặp nếu đó là nội dung của tác\n    giả.\n-   Không tự rút gọn câu văn hoặc tóm tắt nội dung.\n-   Không thêm lời giải thích, bình luận hay tình tiết không có trong\n    nguyên tác.\n-   Giữ nguyên số liệu, thời gian, tên gọi, cấp bậc, cảnh giới, thứ tự\n    sự kiện và kết quả chiến đấu.\n-   Giữ đúng ngôi kể và góc nhìn của nguyên tác.\n-   Có thể điều chỉnh trật tự câu để tiếng Việt tự nhiên hơn, nhưng\n    không được làm thay đổi ý nghĩa.\n\nV. XỬ LÝ LỖI VÀ NỘI DUNG NGOÀI TRUYỆN\n\n1.  Dịch toàn bộ nội dung tiếng Trung sang tiếng Việt; không để sót chữ\n    Hán trong phần truyện, trừ trường hợp người dùng yêu cầu giữ nguyên.\n2.  Không để sót từ tiếng Anh hoặc ngôn ngữ khác nếu chúng có thể dịch\n    chính xác và thuộc nội dung cần dịch.\n3.  Sửa lỗi dấu câu và xuống dòng do định dạng nguồn gây ra, nhưng không\n    làm thay đổi nội dung.\n4.  Không tự ý xóa lời tác giả hoặc ghi chú nếu chưa xác định đó là nội\n    dung ngoài truyện.\n5.  Nếu có quảng cáo, đường link hoặc nội dung giới thiệu nền tảng rõ\n    ràng không thuộc truyện, có thể loại bỏ khi người dùng yêu cầu làm\n    sạch văn bản.\n\nVI. ĐỊNH DẠNG ĐẦU RA\n\n-   Giữ tiêu đề chương theo định dạng: Chương [số]: [Tên chương].\n-   Giữ thứ tự các đoạn và diễn biến của nguyên tác.\n-   Xuống dòng hợp lý giữa lời kể và lời thoại.\n-   Chỉ trả về bản dịch tiếng Việt hoàn chỉnh.\n-   Không thêm lời mở đầu, nhận xét, đánh giá hoặc giải thích quá trình\n    dịch.",
+  danquoc: 'Dịch truyện ngôn tình Dân Quốc (1910-1949) Trung → Việt.\n- Xưng hô đúng ngữ cảnh: tôi/anh/em/thiếp/ngài/thưa ông...\n- Văn phong lịch sự, trang trọng có tình cảm\n- Tên riêng phiên âm Hán Việt\nChỉ trả về bản dịch.',
+  hiendai: 'Bạn là người đọc và dịch truyện ngôn tình hiện đại Trung → Việt chuyên nghiệp, yêu cầu:\n- Xưng hô phải đúng ngữ cảnh và nhất quán xuyên suốt.\n- Văn phong tự nhiên, trôi chảy, giống truyện hiện đại.\n- Không dịch máy, không thêm bớt\n- Giữ nguyên tên riêng, đồng bộ tên nhân vật từ đầu đến cuối.\nChỉ trả về bản dịch.'
+};
+
+function getActivePreset() {
+  const active = document.querySelector('.style-preset-btn.active');
+  if (!active) return 'cotrang';
+  if (active.id === 'presetCotrang') return 'cotrang';
+  if (active.id === 'presetDanquoc') return 'danquoc';
+  if (active.id === 'presetHiendai') return 'hiendai';
+  return 'cotrang';
+}
+
+function editPrompt() {
+  const ta = document.getElementById('systemPrompt');
+  ta.removeAttribute('readonly');
+  ta.style.background = '';
+  ta.style.color = '';
+  ta.style.cursor = '';
+  ta.focus();
+  document.getElementById('btnEditPrompt').style.display = 'none';
+  document.getElementById('btnSavePrompt').style.display = 'inline-flex';
+  const statusEl = document.getElementById('promptSaveStatus');
+  if (statusEl) { statusEl.style.display = 'block'; statusEl.style.color = 'var(--gold-dim)'; statusEl.textContent = '✏️ Đang chỉnh sửa...'; }
+}
+
+function savePrompt() {
+  const ta = document.getElementById('systemPrompt');
+  ta.setAttribute('readonly', true);
+  ta.style.background = 'var(--readonly-bg)';
+  ta.style.color = 'var(--ash)';
+  ta.style.cursor = 'default';
+  document.getElementById('btnEditPrompt').style.display = 'inline-flex';
+  document.getElementById('btnSavePrompt').style.display = 'none';
+  try { localStorage.setItem('tien_dich_system_prompt', ta.value); } catch(e) {}
+  const statusEl = document.getElementById('promptSaveStatus');
+  if (statusEl) { statusEl.style.display = 'block'; statusEl.style.color = 'var(--jade)'; statusEl.textContent = '✅ Đã lưu prompt'; setTimeout(() => { statusEl.style.display = 'none'; }, 2500); }
+}
+
+function resetPrompt() {
+  if (!confirm('Khôi phục prompt về mặc định cho phong cách hiện tại?')) return;
+  const preset = getActivePreset();
+  const ta = document.getElementById('systemPrompt');
+  ta.setAttribute('readonly', true);
+  ta.style.background = 'var(--readonly-bg)';
+  ta.style.color = 'var(--ash)';
+  ta.style.cursor = 'default';
+  document.getElementById('btnEditPrompt').style.display = 'inline-flex';
+  document.getElementById('btnSavePrompt').style.display = 'none';
+  ta.value = DEFAULT_PROMPTS[preset];
+  try { localStorage.removeItem('tien_dich_system_prompt'); } catch(e) {}
+  const statusEl = document.getElementById('promptSaveStatus');
+  if (statusEl) { statusEl.style.display = 'block'; statusEl.style.color = 'var(--red)'; statusEl.textContent = '↺ Đã reset về mặc định'; setTimeout(() => { statusEl.style.display = 'none'; }, 2500); }
+}
+
+function loadPromptFromStorage() {
+  try {
+    let saved = localStorage.getItem('tien_dich_system_prompt');
+    if (saved === LEGACY_COTRANG_P1) { saved = DEFAULT_PROMPTS.cotrang; localStorage.setItem('tien_dich_system_prompt', saved); }
+    if (saved) {
+      const ta = document.getElementById('systemPrompt');
+      if (ta) ta.value = saved;
+    }
+  } catch(e) {}
+  const ta2 = document.getElementById('systemPrompt2');
+  if (ta2) {
+    ta2.value = DEFAULT_PROMPTS2.cotrang;
+    try {
+      let saved2 = localStorage.getItem('tien_dich_system_prompt2');
+      if (saved2 === LEGACY_COTRANG_P2) { saved2 = DEFAULT_PROMPTS2.cotrang; localStorage.setItem('tien_dich_system_prompt2', saved2); }
+      if (saved2) ta2.value = saved2;
+    } catch(e) {}
+  }
+  updatePromptInfo();
+}
+
+// ============================================================
+// TRANSLATE ALL - PHÂN CHƯƠNG VÀ KIỂM TRA TIÊU ĐỀ
+// ============================================================
+async function translateAll(text, log) {
+  appendLog(log, '📜 Bắt đầu dịch tất cả (tự phân chương)...', 'info');
+
+  // Bước 1: Đảm bảo đã phân chương
+  if (state.chapters.length === 0) {
+    detectChapters();
+  }
+
+  if (state.chapters.length <= 1 && state.chapters[0]?.title === 'Toàn bộ văn bản') {
+    // Không có cấu trúc chương rõ ràng → dịch thẳng theo từng phần (khối văn bản)
+    appendLog(log, '⚠️ Không tìm thấy cấu trúc chương, dịch toàn bộ 1 khối.', 'warn');
+    const chunkSize = parseInt(document.getElementById('chunkSize').value) || 2000;
+    state.rawMode = { chunks: splitIntoChunks(text, chunkSize), result: '', doneCount: 0, total: 0 };
+    state.rawMode.total = state.rawMode.chunks.length;
+    await runRawChunksLoop(log);
+    return;
+  }
+
+  const total = state.chapters.length;
+  document.getElementById('chapterProgressCard').style.display = 'block';
+  renderChapterProgress();
+  appendLog(log, `📑 Tự động phân thành ${total} chương, tiến hành dịch từng chương...`, 'info');
+  updateProgress(0, total);
+
+  await runAllModeChapterLoop(log);
+}
+
+// Tiếp tục dịch các chương còn lại của chế độ "Dịch tất cả" (khi văn bản đã phân được chương)
+async function continueTranslateAllChapters(log) {
+  document.getElementById('chapterProgressCard').style.display = 'block';
+  updateProgress(state.chapters.filter(ch => ch.status === 'done').length, state.chapters.length);
+  await runAllModeChapterLoop(log);
+}
+
+// Vòng lặp dịch từng chương dùng chung cho chế độ "Dịch tất cả" (bắt đầu và tiếp tục)
+// Khác chế độ "Từng chương": không xuất file riêng cho mỗi chương, chỉ ghép + xuất 1 file khi xong hết
+async function runAllModeChapterLoop(log) {
+  const total = state.chapters.length;
+
+  for (let i = 0; i < state.chapters.length; i++) {
+    if (state.shouldStop) { appendLog(log, '⏹ Đã dừng.', 'warn'); break; }
+    const ch = state.chapters[i];
+    if (ch.status === 'done') continue;   // bỏ qua chương đã dịch xong khi tiếp tục
+    ch.status = 'doing';
+    renderChapterProgress();
+    appendLog(log, `⚡ Đang dịch Chương ${ch.num}: ${ch.title.slice(0,20)}...`, 'info');
+
+    try {
+      let [translated, notes, scanned] = await translateContent(ch.content, () => state.shouldStop);
+      if (state.shouldStop) { ch.status = 'wait'; break; }
+      translated = applyNameMap(translated);
+      ch.status = 'done';
+      state.translatedChapters[i] = translated;
+      recordNotes('tr', `Chương ${ch.num}`, notes, scanned, log);
+      appendLog(log, `✅ Chương ${ch.num} hoàn thành`, 'ok');
+    } catch(err) {
+      ch.status = 'error';
+      appendLog(log, `❌ Chương ${ch.num} lỗi: ${err.message}`, 'err');
+      if (isQuotaError(err.message)) {
+        state.quotaExhausted = true;
+        state.shouldStop = true;
+        state.wasStopped = true;
+        appendLog(log, `🛑 Hết quota API! Vui lòng nạp thêm quota, sau đó bấm "Tiếp tục dịch" để dịch tiếp Chương ${ch.num}.`, 'err');
+      } else if (err.message.includes('API key')) {
+        state.shouldStop = true;
+        state.wasStopped = true;
+      }
+      break;
+    }
+
+    updateProgress(state.chapters.filter(c => c.status === 'done').length, total);
+    renderChapterProgress();
+    await sleep(300);
+  }
+
+  if (state.shouldStop) return;
+
+  // Bước 2: Ghép lại → kiểm tra tiêu đề chương
+  appendLog(log, '🔍 Kiểm tra tiêu đề chương trước khi ghép...', 'info');
+
+  const chapterHeadingPattern = /^Chương\s+\d+/im;
+  const issues = [];
+
+  // Kiểm tra từng chương đã dịch
+  for (let i = 0; i < state.chapters.length; i++) {
+    const ch = state.chapters[i];
+    if (ch.status !== 'done') continue;
+    const translated = state.translatedChapters[i] || '';
+    const lines = translated.trim().split('\n');
+    const firstLine = lines[0]?.trim() || '';
+
+    // Kiểm tra: chương có tiêu đề "Chương N" ở đầu không
+    if (!chapterHeadingPattern.test(firstLine)) {
+      issues.push({ type: 'missing_heading', chIdx: i, chNum: ch.num });
+    }
+
+    // Kiểm tra: có nhiều hơn 1 tiêu đề "Chương N" trong nội dung (tiêu đề lạc giữa chương)
+    const allHeadings = [...translated.matchAll(/^Chương\s+\d+/gim)];
+    if (allHeadings.length > 1) {
+      issues.push({ type: 'extra_headings', chIdx: i, chNum: ch.num, count: allHeadings.length });
+    }
+  }
+
+  // Tự động thêm tiêu đề "Chương N" cho các chương thiếu (không hỏi lại)
+  const missingIdxs = issues.filter(x => x.type === 'missing_heading').map(x => x.chIdx);
+  if (missingIdxs.length > 0) {
+    missingIdxs.forEach(idx => {
+      const ch = state.chapters[idx];
+      const translated = (state.translatedChapters[idx] || '').trim();
+      state.translatedChapters[idx] = `Chương ${ch.num}\n${translated}`;
+    });
+    appendLog(log, `➕ Đã tự động thêm tiêu đề cho ${missingIdxs.length} chương: ${missingIdxs.map(i => 'Chương ' + state.chapters[i].num).join(', ')}`, 'ok');
+  }
+  const remainingIssues = issues.filter(x => x.type !== 'missing_heading');
+
+  if (remainingIssues.length > 0) {
+    // Hiển thị modal cảnh báo (chỉ còn lỗi tiêu đề thừa)
+    showChapterIssuesModal(remainingIssues, log);
+  } else {
+    // Ghép và xuất ngay
+    mergeAndDownload(log);
+  }
+}
+
+// Tiếp tục dịch phần còn lại khi văn bản không phân được chương (dịch theo khối/phần)
+async function continueTranslateAllRaw(log) {
+  await runRawChunksLoop(log);
+}
+
+async function runRawChunksLoop(log) {
+  const rm = state.rawMode;
+  if (!rm) return;
+  updateProgress(rm.doneCount, rm.total);
+
+  for (let i = rm.doneCount; i < rm.chunks.length; i++) {
+    if (state.shouldStop) break;
+    appendLog(log, `⚡ Đang dịch phần ${i+1}/${rm.total}...`, 'info');
+    try {
+      const prompt = buildTranslatePrompt(rm.chunks[i]);
+      let translated = await callWithRotation(prompt);
+      const scanned = isScanEnabled();
+      let notes = [];
+      if (scanned) [translated, notes] = await scanWithPrompt2(translated);
+      if (state.shouldStop) break;
+      rm.result += translated + '\n\n';
+      recordNotes('tr', `Phần ${i+1}`, notes, scanned, log);
+      rm.doneCount = i + 1;
+      appendLog(log, `✅ Phần ${i+1}/${rm.total} hoàn thành`, 'ok');
+    } catch(err) {
+      appendLog(log, `❌ Phần ${i+1} lỗi: ${err.message}`, 'err');
+      if (isQuotaError(err.message)) {
+        state.quotaExhausted = true;
+        appendLog(log, `🛑 Hết quota API! Vui lòng nạp thêm quota, sau đó bấm "Tiếp tục dịch" để dịch tiếp phần ${i+1}.`, 'err');
+      }
+      state.shouldStop = true;
+      state.wasStopped = true;
+      break;
+    }
+    updateProgress(rm.doneCount, rm.total);
+    await sleep(300);
+  }
+
+  if (state.shouldStop) return;   // chờ người dùng bấm "Tiếp tục dịch"
+
+  let result = applyNameMap(rm.result);
+  state.finalResult = result;
+  const fname = getCustomFilename('Bản dịch đầy đủ.txt');
+  downloadText(result, fname);
+  appendLog(log, `💾 Đã xuất file: ${fname}`, 'ok');
+  showResult(result);
+  appendLog(log, '🎉 Hoàn thành!', 'ok');
+  state.rawMode = null;
+}
+
+function mergeAndDownload(log) {
+  const parts = [];
+  for (let i = 0; i < state.chapters.length; i++) {
+    if (state.translatedChapters[i]) parts.push(state.translatedChapters[i].trim());
+  }
+  const merged = parts.join('\n\n');
+  state.finalResult = merged;
+
+  const chFirst = state.chapters[0]?.num || 1;
+  const chLast = state.chapters[state.chapters.length - 1]?.num || state.chapters.length;
+  const defaultName = `Chương ${chFirst}-${chLast} (gộp).txt`;
+  const fname = getCustomFilename(defaultName);
+  downloadText(merged, fname);
+  if (log) appendLog(log, `💾 Đã ghép và xuất: ${fname}`, 'ok');
+  showResult(merged);
+  if (log) appendLog(log, '🎉 Hoàn thành!', 'ok');
+}
+
+function showChapterIssuesModal(issues, log) {
+  // Tạo modal động nếu chưa có
+  let modal = document.getElementById('chapterIssuesModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'chapterIssuesModal';
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `
+      <div class="modal">
+        <div class="modal-header">
+          <h3>⚠️ Phát hiện vấn đề tiêu đề chương</h3>
+          <button class="modal-close" onclick="document.getElementById('chapterIssuesModal').classList.remove('show')">✕</button>
+        </div>
+        <div class="modal-body" id="chapterIssuesBody"></div>
+      </div>`;
+    document.body.appendChild(modal);
+  }
+
+  const body = document.getElementById('chapterIssuesBody');
+  let html = '<div style="font-size:13px; line-height:1.7; margin-bottom:12px; color:var(--ink);">Tìm thấy các vấn đề sau trước khi ghép bản dịch:</div>';
+
+  const missing = issues.filter(i => i.type === 'missing_heading');
+  const extra = issues.filter(i => i.type === 'extra_headings');
+
+  if (missing.length > 0) {
+    html += `<div style="padding:10px 12px; background:rgba(201,168,76,0.08); border:1px solid var(--border); border-radius:8px; margin-bottom:10px;">
+      <div style="font-size:12px; font-weight:600; color:var(--gold-dim); margin-bottom:6px;">📌 Chương thiếu tiêu đề "Chương N" ở đầu (${missing.length} chương)</div>
+      <div style="font-size:12px; color:var(--ash); margin-bottom:8px;">Các chương này chưa có tiêu đề <code>Chương N</code> ở dòng đầu tiên.</div>
+      <div style="font-size:12px; color:var(--ink); margin-bottom:8px;">${missing.map(i => `Chương ${i.chNum}`).join(', ')}</div>
+      <button class="btn btn-secondary" style="font-size:12px; padding:6px 10px;" onclick="addMissingHeadings(${JSON.stringify(missing.map(i=>i.chIdx))})">➕ Tự động thêm tiêu đề</button>
+    </div>`;
+  }
+
+  if (extra.length > 0) {
+    html += `<div style="padding:10px 12px; background:rgba(139,26,26,0.06); border:1px solid rgba(139,26,26,0.2); border-radius:8px; margin-bottom:10px;">
+      <div style="font-size:12px; font-weight:600; color:var(--red); margin-bottom:6px;">⚠️ Chương có nhiều tiêu đề "Chương N" (${extra.length} chương)</div>
+      <div style="font-size:12px; color:var(--ash); margin-bottom:8px;">Tiêu đề "Chương N" xuất hiện nhiều lần hoặc nằm ở giữa chương — có thể là lỗi dịch.</div>
+      <div style="font-size:12px; color:var(--ink); margin-bottom:8px;">${extra.map(i => `Chương ${i.chNum} (${i.count} tiêu đề)`).join(', ')}</div>
+      <button class="btn btn-danger" style="font-size:12px; padding:6px 10px;" onclick="removeExtraHeadings(${JSON.stringify(extra.map(i=>i.chIdx))})">🗑️ Xóa tiêu đề thừa</button>
+    </div>`;
+  }
+
+  html += `<div class="divider"></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" style="flex:1;" onclick="proceedMerge()">✅ Ghép & xuất file</button>
+      <button class="btn btn-secondary" style="flex:1;" onclick="document.getElementById('chapterIssuesModal').classList.remove('show')">Huỷ</button>
+    </div>`;
+
+  body.innerHTML = html;
+  modal.classList.add('show');
+
+  // Lưu log reference
+  window._mergeLog = log;
+}
+
+function addMissingHeadings(chIdxs) {
+  chIdxs.forEach(idx => {
+    const ch = state.chapters[idx];
+    if (!ch) return;
+    const translated = state.translatedChapters[idx] || '';
+    // Thêm tiêu đề Chương N ở đầu nếu chưa có
+    if (!/^Chương\s+\d+/im.test(translated.split('\n')[0])) {
+      state.translatedChapters[idx] = `Chương ${ch.num}\n${translated}`;
+    }
+  });
+  // Refresh modal
+  const missing = [];
+  const extra = [];
+  for (let i = 0; i < state.chapters.length; i++) {
+    const translated = state.translatedChapters[i] || '';
+    if (state.chapters[i].status !== 'done') continue;
+    const firstLine = translated.trim().split('\n')[0]?.trim() || '';
+    if (!/^Chương\s+\d+/im.test(firstLine)) missing.push({ type: 'missing_heading', chIdx: i, chNum: state.chapters[i].num });
+    const allH = [...translated.matchAll(/^Chương\s+\d+/gim)];
+    if (allH.length > 1) extra.push({ type: 'extra_headings', chIdx: i, chNum: state.chapters[i].num, count: allH.length });
+  }
+  if (missing.length === 0 && extra.length === 0) {
+    document.getElementById('chapterIssuesModal').classList.remove('show');
+    mergeAndDownload(window._mergeLog);
+  } else {
+    showChapterIssuesModal([...missing, ...extra], window._mergeLog);
+  }
+}
+
+function removeExtraHeadings(chIdxs) {
+  chIdxs.forEach(idx => {
+    const ch = state.chapters[idx];
+    if (!ch) return;
+    let translated = state.translatedChapters[idx] || '';
+    const lines = translated.split('\n');
+    let foundFirst = false;
+    const filtered = lines.filter(line => {
+      const isHeading = /^Chương\s+\d+/i.test(line.trim());
+      if (isHeading) {
+        if (!foundFirst) { foundFirst = true; return true; }
+        return false; // xóa tiêu đề thừa
+      }
+      return true;
+    });
+    state.translatedChapters[idx] = filtered.join('\n');
+  });
+  // Refresh modal
+  const missing = [];
+  const extra = [];
+  for (let i = 0; i < state.chapters.length; i++) {
+    const translated = state.translatedChapters[i] || '';
+    if (state.chapters[i].status !== 'done') continue;
+    const firstLine = translated.trim().split('\n')[0]?.trim() || '';
+    if (!/^Chương\s+\d+/im.test(firstLine)) missing.push({ type: 'missing_heading', chIdx: i, chNum: state.chapters[i].num });
+    const allH = [...translated.matchAll(/^Chương\s+\d+/gim)];
+    if (allH.length > 1) extra.push({ type: 'extra_headings', chIdx: i, chNum: state.chapters[i].num, count: allH.length });
+  }
+  if (missing.length === 0 && extra.length === 0) {
+    document.getElementById('chapterIssuesModal').classList.remove('show');
+    mergeAndDownload(window._mergeLog);
+  } else {
+    showChapterIssuesModal([...missing, ...extra], window._mergeLog);
+  }
+}
+
+function proceedMerge() {
+  document.getElementById('chapterIssuesModal').classList.remove('show');
+  mergeAndDownload(window._mergeLog);
+}
+</script>
+</body>
+</html>
